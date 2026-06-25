@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title>ELECTION PILOT | Mana Anna - Mana Netha Campaign</title>
+  <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
@@ -39,7 +39,7 @@
     .stat-card{background:var(--primary);color:white;padding:15px;border-radius:20px;text-align:center;}
     .progress-bar{height:8px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin:8px 0;}
     .progress-fill{height:100%;background:var(--accent);width:0%;}
-    .candidate-photo{width:150px;height:150px;border-radius:24px;object-fit:cover;margin:0 auto 12px auto;display:block;border:4px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+    .candidate-photo{width:150px;height:200px;border-radius:24px;object-fit:cover;margin:0 auto 12px auto;display:block;border:4px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #e2e8f0;z-index:100;max-width:500px;margin:0 auto;background:rgba(255,255,255,0.98);}
     .nav-item{text-align:center;font-size:11px;color:#64748b;padding:4px 0;flex:1;cursor:pointer;}
     .nav-item i{font-size:22px;display:block;margin-bottom:2px;}
@@ -70,6 +70,8 @@
     .vol-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;}
     .vol-stats span{background:#f1f5f9;padding:6px 12px;border-radius:8px;font-size:12px;}
     .visit-count{font-size:12px;color:#64748b;}
+    .admin-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+    .admin-stat-card{background:var(--primary);color:white;padding:15px;border-radius:20px;text-align:center;}
   </style>
 </head>
 <body>
@@ -104,11 +106,11 @@
   <!-- PAGE 1: HOME - Public -->
   <div id="page-home" class="page active">
     <div class="card" style="text-align:center">
-      <img id="candidatePhoto" class="candidate-photo" src="WhatsApp-Image.jpeg" alt="Candidate Photo">
-      <h2 id="candidateName">Mana Anna - Mana Netha</h2>
+      <img id="candidatePhoto" class="candidate-photo" src="/images/vijay.jpeg" alt="Candidate Photo">
+      <h2 id="candidateName">Mana Anna - Mana Vijay Anna</h2>
       <p id="slogan" class="text-accent">"My Promise - Your Trust | Development First"</p>
       <div style="display:flex;gap:10px;margin:12px 0;">
-        <a href="tel:+918500172644" class="btn" style="width:auto;flex:1"><i class="fas fa-phone"></i> <span id="callText">Call</span></a>
+        <a href="tel+919396806527" class="btn" style="width:auto;flex:1"><i class="fas fa-phone"></i> <span id="callText">Call</span></a>
         <a href="#" id="waLink" class="btn btn-accent" style="width:auto;flex:1"><i class="fab fa-whatsapp"></i> <span id="waText">WhatsApp</span></a>
       </div>
       <div style="display:flex;gap:8px;">
@@ -119,13 +121,6 @@
     <div class="card"><h3 id="promisesTitle">🎯 Key Promises</h3>
       <ul style="margin-left:20px" id="promisesList"><li>✅ 24x7 Clean Water Supply</li><li>✅ Pothole-free Roads</li><li>✅ Door-to-door Garbage Collection</li><li>✅ Women Safety - CCTV Cameras</li></ul>
     </div>
-    <div class="stat-grid">
-      <div class="stat-card">🏘️ <span id="totalLabel">Total Houses</span><br><span id="totalHouses">0</span></div>
-      <div class="stat-card">✅ <span id="coveredLabel">Covered</span><br><span id="coveredHouses">0</span></div>
-      <div class="stat-card">🔄 <span id="followLabel">Follow-up</span><br><span id="followupCount">0</span></div>
-      <div class="stat-card">⚠️ <span id="issuesLabel">Issues</span><br><span id="issueCount">0</span></div>
-    </div>
-    <div class="card"><div class="progress-bar"><div class="progress-fill" id="coverageFill"></div></div><p id="coverageText">Campaign Progress: 0%</p></div>
     
     <div class="card" id="publicEventsSection">
       <h3>📅 Upcoming Events</h3>
@@ -157,17 +152,6 @@
         </select>
       </div>
       <button type="button" id="saveVisitBtn" class="btn"><i class="fas fa-save"></i> <span id="saveText">Save Visit</span></button>
-    </div>
-    
-    <!-- Volunteer-wise Visit History -->
-    <div class="card">
-      <h3>📊 Visit History by Volunteer</h3>
-      <div class="input-group">
-        <select id="visitHistoryFilter">
-          <option value="all">All Volunteers</option>
-        </select>
-      </div>
-      <div id="visitHistoryList"></div>
     </div>
     
     <button type="button" id="exportVisitsBtn" class="btn-outline" style="margin-top:8px;"><i class="fas fa-download"></i> <span id="exportText">Export CSV</span></button>
@@ -226,26 +210,40 @@
   <div id="page-admin" class="page admin-only">
     <div class="card">
       <h3>🔐 Admin Dashboard <span class="admin-badge">Admin</span></h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-        <div class="stat-card" style="background:var(--accent);padding:12px;"><span id="adminIssueCount">0</span><br>Total Issues</div>
-        <div class="stat-card" style="background:var(--success);padding:12px;"><span id="adminVolCount">0</span><br>Volunteers</div>
-        <div class="stat-card" style="background:var(--warning);padding:12px;"><span id="adminPendingVols">0</span><br>Pending Approvals</div>
+      <div class="admin-stat-grid">
+        <div class="admin-stat-card">🏘️ <span id="adminTotalLabel">Total Houses</span><br><span id="adminTotalHouses">5000</span></div>
+        <div class="admin-stat-card">✅ <span id="adminCoveredLabel">Covered</span><br><span id="adminCoveredHouses">0</span></div>
+        <div class="admin-stat-card">🔄 <span id="adminFollowLabel">Follow-up</span><br><span id="adminFollowupCount">0</span></div>
+        <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><br><span id="adminIssueCount">0</span></div>
       </div>
+      <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText">Campaign Progress: 0%</p></div>
     </div>
     
-    <!-- 1. ISSUES with DELETE -->
+    <div class="card">
+      <h3>🏠 All House Visits <span class="admin-badge">Admin</span></h3>
+      <div id="adminAllVisits"></div>
+    </div>
+    
+    <div class="card">
+      <h3>📋 All Daily Reports <span class="admin-badge">Admin</span></h3>
+      <div id="adminAllReports"></div>
+    </div>
+    
     <div class="card">
       <h3>⚠️ All Reported Issues <span class="admin-badge">Admin</span></h3>
       <div id="adminIssuesList"></div>
     </div>
     
-    <!-- 2. VOLUNTEER APPROVAL with DELETE -->
     <div class="card">
       <h3>📋 Volunteer Approvals <span class="admin-badge">Admin</span></h3>
       <div id="pendingVolunteersList"></div>
     </div>
     
-    <!-- 3. VOLUNTEER-WISE REPORTS with SEARCH and DELETE -->
+    <div class="card">
+      <h3>✅ Approved Volunteers <span class="admin-badge">Admin</span></h3>
+      <div id="approvedVolunteersList"></div>
+    </div>
+    
     <div class="card">
       <h3>📊 Volunteer Reports <span class="admin-badge">Admin</span></h3>
       <div class="search-box">
@@ -257,13 +255,11 @@
       <div id="adminFilteredReports"></div>
     </div>
     
-    <!-- 4. FULL REPORTS -->
     <div class="card">
       <h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3>
       <div id="adminFullReports"></div>
     </div>
     
-    <!-- 5. EVENTS with DELETE -->
     <div class="card">
       <h3>📅 Manage Events</h3>
       <div class="input-group"><input id="eventTitle" placeholder="Event Title"></div>
@@ -273,7 +269,6 @@
       <div id="adminEventsList" style="margin-top:10px;"></div>
     </div>
     
-    <!-- 6. GALLERY with DELETE -->
     <div class="card">
       <h3>🖼️ Manage Gallery</h3>
       <div class="input-group"><input type="file" id="galleryImageInput" accept="image/*"></div>
@@ -307,11 +302,11 @@
     events: [],
     gallery: [],
     config: { 
-      candidateNameTe: "మన అన్న", 
-      candidateNameEn: "Mana Anna - Mana Netha", 
+      candidateNameTe: "మన అన్న విజయ్ అన్న", 
+      candidateNameEn: "Mana Anna - Mana Vijay Anna", 
       sloganTe: '"నా హామీ - మీ నమ్మకం | అభివృద్ధి మొదట"', 
       sloganEn: '"My Promise - Your Trust | Development First"', 
-      whatsapp: "+918500172644", 
+      whatsapp: "+919396806527", 
       photo: "WhatsApp-Image.jpeg" 
     }
   };
@@ -348,9 +343,10 @@
     noIssuesReported: "ఇంకా సమస్యలు నమోదు కాలేదు",
     fullReport: "పూర్తి నివేదిక", totalVisits: "మొత్తం సందర్శనలు", totalReports: "మొత్తం రిపోర్ట్లు",
     delete: "తొలగించు", confirmDelete: "మీరు తొలగించాలనుకుంటున్నారా?",
-    visitHistoryByVol: "వాలంటీర్ వారీ సందర్శన చరిత్ర", allVols: "అందరు వాలంటీర్లు",
-    noVisitsForVol: "ఈ వాలంటీర్ కు సందర్శనలు లేవు", totalVisitsLabel: "మొత్తం సందర్శనలు",
-    filterReports: "రిపోర్ట్ ఫిల్టర్", reportBy: "రిపోర్ట్ వారీగా"
+    allVisits: "అన్ని సందర్శనలు", allReports: "అన్ని రిపోర్ట్లు",
+    noVisitsYet: "ఇంకా సందర్శనలు లేవు", noReportsYet: "ఇంకా రిపోర్ట్లు లేవు",
+    approvedVols: "ఆమోదించిన వాలంటీర్లు", noApprovedVols: "ఆమోదించిన వాలంటీర్లు లేరు",
+    allVols: "అందరు వాలంటీర్లు", reportBy: "రిపోర్ట్ వారీగా"
   };
 
   const EN = {
@@ -380,9 +376,10 @@
     noIssuesReported: "No issues reported yet",
     fullReport: "Full Report", totalVisits: "Total Visits", totalReports: "Total Reports",
     delete: "Delete", confirmDelete: "Are you sure you want to delete?",
-    visitHistoryByVol: "Visit History by Volunteer", allVols: "All Volunteers",
-    noVisitsForVol: "No visits for this volunteer", totalVisitsLabel: "Total Visits",
-    filterReports: "Filter Reports", reportBy: "Report by"
+    allVisits: "All House Visits", allReports: "All Daily Reports",
+    noVisitsYet: "No visits recorded yet", noReportsYet: "No reports submitted yet",
+    approvedVols: "Approved Volunteers", noApprovedVols: "No approved volunteers",
+    allVols: "All Volunteers", reportBy: "Report by"
   };
 
   function setLanguage(lang) {
@@ -395,10 +392,10 @@
     document.getElementById("volBtnText").innerText = currentText.vol;
     document.getElementById("issueBtnText").innerText = currentText.issue;
     document.getElementById("promisesTitle").innerHTML = currentText.promises;
-    document.getElementById("totalLabel").innerText = currentText.total;
-    document.getElementById("coveredLabel").innerText = currentText.covered;
-    document.getElementById("followLabel").innerText = currentText.follow;
-    document.getElementById("issuesLabel").innerText = currentText.issuesLabel;
+    document.getElementById("adminTotalLabel").innerText = currentText.total;
+    document.getElementById("adminCoveredLabel").innerText = currentText.covered;
+    document.getElementById("adminFollowLabel").innerText = currentText.follow;
+    document.getElementById("adminIssuesLabel").innerText = currentText.issuesLabel;
     
     document.getElementById("d2dTitle").innerHTML = currentText.d2d;
     document.getElementById("saveText").innerText = currentText.save;
@@ -507,43 +504,93 @@
 
   function updateAdminUI() {
     document.getElementById("adminIssueCount").innerText = appData.issues.length;
-    document.getElementById("adminVolCount").innerText = appData.volunteers.length;
-    document.getElementById("adminPendingVols").innerText = appData.volunteers.filter(v => v.status === "pending").length;
+    // These IDs might not exist, but we keep for compatibility
+    const volCountEl = document.getElementById("adminVolCount");
+    if (volCountEl) volCountEl.innerText = appData.volunteers.length;
+    const pendingEl = document.getElementById("adminPendingVols");
+    if (pendingEl) pendingEl.innerText = appData.volunteers.filter(v => v.status === "pending").length;
   }
 
   // ======================= POPULATE FILTERS =======================
   function populateFilters() {
     const approved = appData.volunteers.filter(v => v.status === "approved");
-    const filters = ["visitHistoryFilter", "adminReportFilter"];
-    filters.forEach(id => {
-      const sel = document.getElementById(id);
-      if (!sel) return;
-      const currentVal = sel.value;
-      sel.innerHTML = `<option value="all">${currentText.allVols}</option>`;
+    const filterEl = document.getElementById("adminReportFilter");
+    if (filterEl) {
+      const currentVal = filterEl.value;
+      filterEl.innerHTML = `<option value="all">${currentText.allVols || 'All Volunteers'}</option>`;
       approved.forEach(v => {
-        sel.innerHTML += `<option value="${v.name}">${v.name}</option>`;
+        filterEl.innerHTML += `<option value="${v.name}">${v.name}</option>`;
       });
       if (currentVal && approved.some(v => v.name === currentVal)) {
-        sel.value = currentVal;
+        filterEl.value = currentVal;
       }
-    });
+    }
   }
 
-  // ======================= VISIT HISTORY BY VOLUNTEER =======================
-  function renderVisitHistory() {
-    const cont = document.getElementById("visitHistoryList");
+  // ======================= ADMIN ALL VISITS =======================
+  function renderAdminAllVisits() {
+    const cont = document.getElementById("adminAllVisits");
     if (!cont) return;
-    const filter = document.getElementById("visitHistoryFilter").value;
-    let visits = appData.visits;
-    if (filter !== "all") {
-      visits = visits.filter(v => v.volunteer === filter);
-    }
-    if (visits.length === 0) {
-      cont.innerHTML = `<div class="card">${currentText.noVisitsForVol}</div>`;
+    if (appData.visits.length === 0) {
+      cont.innerHTML = `<p style="color:#94a3b8;">${currentText.noVisitsYet}</p>`;
       return;
     }
-    cont.innerHTML = `<h3>📋 ${currentText.visitHistoryByVol}</h3>` + 
-      visits.slice().reverse().map(v => `<div class="card"><b>${v.houseNo}</b> - ${v.familyName}<br>${currentText.status}: ${v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending'}<br>${currentText.volunteer}: ${v.volunteer}</div>`).join("");
+    cont.innerHTML = appData.visits.slice().reverse().map(v => `
+      <div class="card" style="padding:10px;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${v.houseNo}</strong> - ${v.familyName}<br>
+            <span style="font-size:12px;color:#64748b;">${currentText.status}: ${v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending'}</span><br>
+            <span style="font-size:12px;color:#64748b;">${currentText.volunteer}: ${v.volunteer}</span>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteVisit('${v.id || v.timestamp || Date.now()}')">🗑️</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function deleteVisit(id) {
+    if (confirm(currentText.confirmDelete)) {
+      appData.visits = appData.visits.filter((v, index) => {
+        const vid = v.id || v.timestamp || index;
+        return vid != id;
+      });
+      saveData();
+      renderAll();
+    }
+  }
+
+  // ======================= ADMIN ALL REPORTS =======================
+  function renderAdminAllReports() {
+    const cont = document.getElementById("adminAllReports");
+    if (!cont) return;
+    if (appData.dailyReports.length === 0) {
+      cont.innerHTML = `<p style="color:#94a3b8;">${currentText.noReportsYet}</p>`;
+      return;
+    }
+    cont.innerHTML = appData.dailyReports.slice().reverse().map(r => `
+      <div class="card" style="padding:10px;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${r.volunteer}</strong>
+            <span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 ${r.housesVisited} ${currentText.housesVisited}</span>
+            <div style="font-size:12px;color:#475569;margin-top:2px;">${r.notes || ''}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteAdminReport('${r.id || r.timestamp || Date.now()}')">🗑️</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function deleteAdminReport(id) {
+    if (confirm(currentText.confirmDelete)) {
+      appData.dailyReports = appData.dailyReports.filter((r, index) => {
+        const rid = r.id || r.timestamp || index;
+        return rid != id;
+      });
+      saveData();
+      renderAll();
+    }
   }
 
   // ======================= ADMIN FILTERED REPORTS =======================
@@ -567,7 +614,7 @@
     reports.forEach(r => totalHouses += parseInt(r.housesVisited) || 0);
     cont.innerHTML = `
       <div style="background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px;">
-        <strong>${currentText.totalVisitsLabel}: ${totalHouses}</strong> | ${currentText.totalReports}: ${reports.length}
+        <strong>${currentText.totalVisits}: ${totalHouses}</strong> | ${currentText.totalReports}: ${reports.length}
       </div>
     ` + reports.slice().reverse().map(r => `
       <div class="card" style="padding:10px;margin-bottom:6px;">
@@ -577,21 +624,10 @@
             <span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 ${r.housesVisited} ${currentText.housesVisited}</span>
             <div style="font-size:12px;color:#475569;margin-top:2px;">${r.notes || ''}</div>
           </div>
-          <button class="btn btn-danger btn-sm" onclick="deleteReport('${r.id || r.timestamp || Date.now()}')">🗑️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAdminReport('${r.id || r.timestamp || Date.now()}')">🗑️</button>
         </div>
       </div>
     `).join("");
-  }
-
-  function deleteReport(id) {
-    if (confirm(currentText.confirmDelete)) {
-      appData.dailyReports = appData.dailyReports.filter((r, index) => {
-        const rId = r.id || r.timestamp || index;
-        return rId != id;
-      });
-      saveData();
-      renderAll();
-    }
   }
 
   // ======================= ADMIN FULL REPORT =======================
@@ -607,7 +643,6 @@
     html += `<div class="report-summary"><span>${currentText.volReg}:</span><strong>${appData.volunteers.filter(v => v.status === "approved").length}</strong></div>`;
     html += `</div>`;
     
-    // Volunteer-wise summary
     if (appData.dailyReports.length > 0) {
       let volReports = {};
       appData.dailyReports.forEach(r => {
@@ -687,6 +722,31 @@
     `).join("");
   }
 
+  // ======================= APPROVED VOLUNTEERS with DELETE =======================
+  function renderApprovedVolunteers() {
+    const cont = document.getElementById("approvedVolunteersList");
+    if (!cont) return;
+    const approved = appData.volunteers.filter(v => v.status === "approved");
+    if (approved.length === 0) {
+      cont.innerHTML = `<p style="color:#94a3b8;">${currentText.noApprovedVols}</p>`;
+      return;
+    }
+    cont.innerHTML = approved.map(v => `
+      <div class="card" style="padding:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${v.name}</strong><br>
+            <span style="font-size:13px;color:#64748b;">📞 ${v.mobile} | 📍 ${v.area}</span>
+          </div>
+          <span class="approved-badge">${currentText.approved}</span>
+        </div>
+        <div style="margin-top:6px;">
+          <button class="btn btn-danger btn-sm" onclick="deleteApprovedVolunteer('${v.id}')">🗑️ ${currentText.delete}</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
   function approveVolunteer(id) {
     const vol = appData.volunteers.find(v => v.id === id);
     if (vol) {
@@ -699,6 +759,16 @@
   }
 
   function deleteVolunteer(id) {
+    if (confirm(currentText.confirmDelete)) {
+      appData.volunteers = appData.volunteers.filter(v => v.id !== id);
+      saveData();
+      renderAll();
+      populateFilters();
+      populateVolunteerDropdowns();
+    }
+  }
+
+  function deleteApprovedVolunteer(id) {
     if (confirm(currentText.confirmDelete)) {
       appData.volunteers = appData.volunteers.filter(v => v.id !== id);
       saveData();
@@ -821,20 +891,21 @@
     }
   }
 
-  // ======================= CORE FUNCTIONS =======================
-  function updateStats() {
+  // ======================= ADMIN STATS =======================
+  function updateAdminStats() {
     let total = 5000;
     let covered = appData.visits.filter(v => v.status === "Visited").length;
     let followups = appData.visits.filter(v => (v.status || "").includes("Follow-up")).length;
-    document.getElementById("totalHouses").innerText = total;
-    document.getElementById("coveredHouses").innerText = covered;
-    document.getElementById("followupCount").innerText = followups;
-    document.getElementById("issueCount").innerText = appData.issues.length;
+    document.getElementById("adminTotalHouses").innerText = total;
+    document.getElementById("adminCoveredHouses").innerText = covered;
+    document.getElementById("adminFollowupCount").innerText = followups;
+    document.getElementById("adminIssueCount").innerText = appData.issues.length;
     let percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
-    document.getElementById("coverageFill").style.width = percent + "%";
-    document.getElementById("coverageText").innerHTML = `${currentText.coverage}: ${percent.toFixed(1)}% (${covered}/${total})`;
+    document.getElementById("adminCoverageFill").style.width = percent + "%";
+    document.getElementById("adminCoverageText").innerHTML = `${currentText.coverage}: ${percent.toFixed(1)}% (${covered}/${total})`;
   }
 
+  // ======================= CORE FUNCTIONS =======================
   function renderVisits() { 
     let cont = document.getElementById("visitsList"); 
     if(!cont) return;
@@ -903,10 +974,12 @@
 
   function renderAll() {
     renderVisits();
-    renderVisitHistory();
+    renderAdminAllVisits();
+    renderAdminAllReports();
     renderAdminIssues();
     renderVolunteers();
     renderPendingVolunteers();
+    renderApprovedVolunteers();
     renderDailyReports();
     renderAdminFilteredReports();
     renderAdminFullReport();
@@ -914,7 +987,7 @@
     renderTopVolunteers();
     renderEvents();
     renderGallery();
-    updateStats();
+    updateAdminStats();
     updateAdminUI();
   }
 
@@ -935,11 +1008,13 @@
   }
 
   // ======================= EVENT LISTENERS =======================
-  document.getElementById("saveVisitBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("saveVisitBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let houseNo = document.getElementById("houseNo").value; 
     if(!houseNo){ alert("Please enter house number"); return; } 
     appData.visits.push({
+      id: Date.now().toString(),
+      timestamp: Date.now(),
       houseNo, 
       familyName: document.getElementById("familyName").value, 
       mobile: document.getElementById("mobileD2D").value, 
@@ -954,9 +1029,7 @@
     alert(currentText.savedMsg); 
   });
 
-  document.getElementById("visitHistoryFilter")?.addEventListener("change", renderVisitHistory);
-
-  document.getElementById("saveIssueBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("saveIssueBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let name = document.getElementById("issuePersonName").value; 
     if(!name){ alert("Please enter your name"); return; } 
@@ -976,7 +1049,7 @@
     alert(currentText.submittedMsg); 
   });
 
-  document.getElementById("addVolunteerRegBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("addVolunteerRegBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let name = document.getElementById("volNameReg").value; 
     let mobile = document.getElementById("volMobileReg").value; 
@@ -1001,7 +1074,7 @@
     populateVolunteerDropdowns();
   });
 
-  document.getElementById("submitDailyReportBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("submitDailyReportBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let vol = document.getElementById("dailyVolName").value; 
     let houses = document.getElementById("housesVisitedDaily").value; 
@@ -1019,7 +1092,7 @@
     alert(currentText.report); 
   });
 
-  document.getElementById("addBoothBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("addBoothBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let num = document.getElementById("boothNum").value; 
     let area = document.getElementById("boothAreaName").value; 
@@ -1036,7 +1109,7 @@
     alert(currentText.add); 
   });
 
-  document.getElementById("exportVisitsBtn")?.addEventListener("click",()=>{ 
+  document.getElementById("exportVisitsBtn")?.addEventListener("click",function(){ 
     if (isAdmin) return;
     let csv = "House No,Family,Mobile,Status,Volunteer\n"; 
     appData.visits.forEach(v=>{ csv+=`"${v.houseNo}","${v.familyName}","${v.mobile}","${v.status}","${v.volunteer}"\n`;}); 
@@ -1054,7 +1127,7 @@
   document.getElementById("adminLogoutBtn")?.addEventListener("click", logoutAdmin);
 
   // Admin: Add Event
-  document.getElementById("addEventBtn")?.addEventListener("click", () => {
+  document.getElementById("addEventBtn")?.addEventListener("click", function() {
     if (!isAdmin) return;
     const title = document.getElementById("eventTitle").value;
     const date = document.getElementById("eventDate").value;
@@ -1074,27 +1147,27 @@
   });
 
   // Admin: Upload Gallery
-  document.getElementById("uploadGalleryBtn")?.addEventListener("click", () => {
+  document.getElementById("uploadGalleryBtn")?.addEventListener("click", function() {
     if (!isAdmin) return;
     uploadGalleryImage();
   });
 
   // Navigation
-  document.querySelectorAll(".nav-item").forEach(nav => { 
-    nav.addEventListener("click", () => { 
+  document.querySelectorAll(".nav-item").forEach(function(nav) { 
+    nav.addEventListener("click", function() { 
       if (isAdmin) return;
       let page = nav.getAttribute("data-page"); 
       if (page) goToPage(page); 
     }); 
   });
 
-  document.querySelectorAll(".lang-btn").forEach(btn => { 
-    btn.addEventListener("click", () => { 
+  document.querySelectorAll(".lang-btn").forEach(function(btn) { 
+    btn.addEventListener("click", function() { 
       setLanguage(btn.getAttribute("data-lang")); 
     }); 
   });
 
-  document.getElementById("adminPass")?.addEventListener("keydown", (e) => {
+  document.getElementById("adminPass")?.addEventListener("keydown", function(e) {
     if (e.key === "Enter") loginAdmin();
   });
 
@@ -1102,10 +1175,12 @@
   window.goToPage = goToPage;
   window.approveVolunteer = approveVolunteer;
   window.deleteVolunteer = deleteVolunteer;
+  window.deleteApprovedVolunteer = deleteApprovedVolunteer;
   window.deleteEvent = deleteEvent;
   window.deleteGalleryImage = deleteGalleryImage;
   window.deleteIssue = deleteIssue;
-  window.deleteReport = deleteReport;
+  window.deleteAdminReport = deleteAdminReport;
+  window.deleteVisit = deleteVisit;
   window.filterAdminReports = filterAdminReports;
 
   // Initialize
