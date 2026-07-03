@@ -6,68 +6,103 @@
   <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--primary:#1e4a6b;--accent:#e05a2a;--success:#10b981;--warning:#f59e0b;--gray:#f1f5f9;}
+    :root{--primary:#0f2b3d;--primary-light:#1a4a6a;--accent:#e85d3a;--accent-light:#f07a5a;--success:#10b981;--warning:#f59e0b;--gray:#f1f5f9;--dark:#0a1a2a;--glass:rgba(255,255,255,0.12);}
     body{font-family:'Inter',sans-serif;background:#f0f2f5;scroll-behavior:smooth;overflow-x:hidden;}
     .app-container{max-width:500px;margin:0 auto;background:white;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.05);position:relative;padding-bottom:70px;}
-    .app-header{background:var(--primary);color:white;padding:10px 16px;text-align:center;}
-    .app-header h1{font-size:18px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;}
-    .developer-badge{font-size:10px;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:30px;margin-top:5px;display:inline-block;}
-    .developer-badge i{font-size:10px;margin-right:3px;}
-    .lang-buttons{display:flex;justify-content:center;gap:12px;margin-top:8px;}
-    .lang-btn{background:rgba(255,255,255,0.2);border:none;padding:5px 16px;border-radius:30px;color:white;font-weight:500;cursor:pointer;}
-    .lang-btn.active{background:var(--accent);}
-    .page{display:none;padding:16px 14px 20px 14px;}
+    .app-header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;padding:14px 16px 12px;text-align:center;position:relative;overflow:hidden;}
+    .app-header::before{content:'';position:absolute;top:-50%;right:-20%;width:200px;height:200px;background:rgba(255,255,255,0.03);border-radius:50%;}
+    .app-header h1{font-size:18px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-weight:700;letter-spacing:-0.3px;}
+    .app-header h1 span{font-weight:300;opacity:0.7;font-size:11px;}
+    .developer-badge{font-size:10px;background:var(--glass);padding:4px 14px;border-radius:30px;margin-top:4px;display:inline-block;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08);}
+    .developer-badge i{font-size:10px;margin-right:4px;}
+    .lang-buttons{display:flex;justify-content:center;gap:10px;margin-top:8px;}
+    .lang-btn{background:var(--glass);border:none;padding:5px 18px;border-radius:30px;color:white;font-weight:500;cursor:pointer;font-size:12px;transition:all 0.2s;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.06);}
+    .lang-btn.active{background:var(--accent);border-color:var(--accent);}
+    .lang-btn:hover{background:rgba(255,255,255,0.2);}
+    .page{display:none;padding:16px 14px 20px 14px;animation:fadeIn 0.3s ease;}
     .page.active{display:block;}
-    .card{background:white;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);border:1px solid #eef2f6;}
-    .btn{background:var(--primary);color:white;border:none;padding:12px 18px;border-radius:40px;font-weight:600;width:100%;margin:6px 0;font-size:14px;cursor:pointer;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .card{background:white;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);border:1px solid #eef2f6;transition:box-shadow 0.2s;}
+    .card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+    .btn{background:var(--primary);color:white;border:none;padding:12px 18px;border-radius:40px;font-weight:600;width:100%;margin:6px 0;font-size:14px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
     .btn-accent{background:var(--accent);}
-    .btn-outline{background:white;border:1px solid var(--primary);color:var(--primary);}
-    .btn-success{background:var(--success);color:white;}
-    .btn-warning{background:var(--warning);color:white;}
-    .btn-danger{background:#ef4444;color:white;}
-    .btn-whatsapp{background:#25D366;color:white;}
-    .btn-sm{padding:6px 14px;width:auto;font-size:12px;display:inline-block;margin:3px;}
+    .btn-accent:hover{background:#d04e2a;}
+    .btn-outline{background:white;border:2px solid var(--primary);color:var(--primary);}
+    .btn-outline:hover{background:var(--primary);color:white;}
+    .btn-success{background:var(--success);}
+    .btn-warning{background:var(--warning);}
+    .btn-danger{background:#ef4444;}
+    .btn-whatsapp{background:#25D366;}
+    .btn-sm{padding:6px 14px;width:auto;font-size:12px;display:inline-flex;margin:3px;gap:4px;}
     .input-group{margin-bottom:12px;}
-    input,select,textarea{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:16px;font-size:14px;font-family:inherit;}
+    input,select,textarea{width:100%;padding:12px 16px;border:2px solid #e8edf2;border-radius:16px;font-size:14px;font-family:inherit;transition:border 0.2s;background:#fafbfc;}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);background:white;}
     .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
     .stat-card{background:var(--primary);color:white;padding:15px;border-radius:20px;text-align:center;}
-    .progress-bar{height:8px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin:8px 0;}
-    .progress-fill{height:100%;background:var(--accent);width:0%;}
-    .candidate-photo{width:150px;height:200px;border-radius:24px;object-fit:cover;margin:0 auto 12px auto;display:block;border:4px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #e2e8f0;z-index:100;max-width:500px;margin:0 auto;background:rgba(255,255,255,0.98);}
-    .nav-item{text-align:center;font-size:11px;color:#64748b;padding:4px 0;flex:1;cursor:pointer;}
-    .nav-item i{font-size:22px;display:block;margin-bottom:2px;}
-    .nav-item.active{color:var(--accent);font-weight:600;}
-    .whatsapp-float{position:fixed;bottom:70px;right:16px;background:#25D366;color:white;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,0.25);text-decoration:none;border:2px solid white;}
+    .progress-bar{height:8px;background:#e8edf2;border-radius:10px;overflow:hidden;margin:8px 0;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));width:0%;transition:width 0.6s ease;}
+    .candidate-photo{width:130px;height:170px;border-radius:24px;object-fit:cover;margin:0 auto 12px auto;display:block;border:4px solid white;box-shadow:0 4px 16px rgba(0,0,0,0.12);}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);display:flex;justify-content:space-around;padding:6px 0 10px;border-top:1px solid rgba(0,0,0,0.05);z-index:100;max-width:500px;margin:0 auto;}
+    .nav-item{text-align:center;font-size:10px;color:#94a3b8;padding:4px 0;flex:1;cursor:pointer;transition:color 0.2s;border-radius:12px;padding:6px 0;}
+    .nav-item i{font-size:22px;display:block;margin-bottom:1px;}
+    .nav-item.active{color:var(--accent);font-weight:600;background:rgba(232,93,58,0.08);}
+    .nav-item:hover{color:var(--primary);}
+    .whatsapp-float{position:fixed;bottom:75px;right:16px;background:#25D366;color:white;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;z-index:99;box-shadow:0 4px 16px rgba(37,211,102,0.35);text-decoration:none;border:2px solid white;transition:transform 0.2s;}
+    .whatsapp-float:hover{transform:scale(1.05);}
     .footer-text{text-align:center;font-size:9px;color:#94a3b8;padding:8px;}
-    h2{font-size:18px;margin-bottom:12px;}
-    h3{font-size:16px;margin-bottom:10px;}
+    h2{font-size:18px;margin-bottom:12px;font-weight:700;}
+    h3{font-size:15px;margin-bottom:10px;font-weight:600;color:var(--dark);}
     .text-accent{color:var(--accent);font-weight:bold;}
-    .admin-badge{background:var(--accent);color:white;padding:2px 10px;border-radius:30px;font-size:10px;margin-left:8px;}
+    .admin-badge{background:var(--accent);color:white;padding:2px 12px;border-radius:30px;font-size:10px;margin-left:8px;}
     .pending-badge{background:#f59e0b;color:white;padding:2px 12px;border-radius:30px;font-size:10px;}
     .approved-badge{background:#10b981;color:white;padding:2px 12px;border-radius:30px;font-size:10px;}
     .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-    .gallery-grid img{width:100%;height:100px;object-fit:cover;border-radius:12px;border:2px solid #e2e8f0;}
-    .event-card{border-left:4px solid var(--accent);padding:12px;margin-bottom:10px;background:#f8fafc;border-radius:12px;}
+    .gallery-grid img{width:100%;height:100px;object-fit:cover;border-radius:12px;border:2px solid #eef2f6;cursor:pointer;transition:transform 0.2s;}
+    .gallery-grid img:hover{transform:scale(1.02);}
+    .video-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+    .video-grid video{width:100%;height:150px;object-fit:cover;border-radius:12px;border:2px solid #eef2f6;background:#000;cursor:pointer;}
+    .event-card{border-left:4px solid var(--accent);padding:12px 14px;margin-bottom:10px;background:#f8fafc;border-radius:12px;transition:background 0.2s;}
+    .event-card:hover{background:#f1f4f8;}
     .hidden{display:none !important;}
     .admin-only{display:none;}
     .admin-only.active{display:block;}
-    .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
-    .login-box{background:white;border-radius:24px;padding:30px;max-width:400px;width:100%;}
+    .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .login-box{background:white;border-radius:28px;padding:32px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+    .login-box h2{text-align:center;color:var(--dark);}
     .issue-detail{font-size:13px;color:#475569;margin:4px 0;}
     .issue-detail i{width:20px;color:var(--primary);}
-    .report-summary{display:flex;justify-content:space-between;padding:8px;background:#f8fafc;border-radius:8px;margin:4px 0;}
+    .report-summary{display:flex;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-radius:8px;margin:4px 0;}
     .bottom-nav.admin-mode{display:none !important;}
     .search-box{display:flex;gap:8px;margin-bottom:12px;}
     .search-box select{flex:1;}
     .admin-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
-    .admin-stat-card{background:var(--primary);color:white;padding:15px;border-radius:20px;text-align:center;}
-    .message-box{background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;margin:8px 0;}
-    .message-box .sent{color:#16a34a;font-size:12px;}
+    .admin-stat-card{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;padding:15px;border-radius:20px;text-align:center;}
+    .admin-stat-card span{font-size:22px;font-weight:700;display:block;margin-top:4px;}
     .team-msg-box{background:#f0f4ff;border:1px solid #93c5fd;border-radius:12px;padding:12px;margin:8px 0;}
     .badge-all{background:#8b5cf6;color:white;padding:2px 12px;border-radius:30px;font-size:10px;}
+    .gallery-item{position:relative;border-radius:12px;overflow:hidden;}
+    .gallery-item .delete-btn{position:absolute;top:4px;right:4px;background:#ef4444;color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.8;}
+    .gallery-item .delete-btn:hover{opacity:1;}
+    .lightbox{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;}
+    .lightbox.active{display:flex;}
+    .lightbox img{max-width:95%;max-height:90%;object-fit:contain;border-radius:12px;}
+    .lightbox video{max-width:95%;max-height:90%;border-radius:12px;}
+    .lightbox .close-btn{position:absolute;top:20px;right:30px;color:white;font-size:40px;cursor:pointer;background:transparent;border:none;opacity:0.7;transition:opacity 0.2s;}
+    .lightbox .close-btn:hover{opacity:1;}
+    .team-msg-box .del-msg{background:#ef4444;color:white;border:none;padding:2px 12px;border-radius:30px;font-size:10px;cursor:pointer;float:right;}
+    .sync-status{font-size:11px;color:#94a3b8;text-align:center;padding:4px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .sync-status .fa-spinner{animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .supabase-connected{color:#10b981;}
+    .supabase-disconnected{color:#ef4444;}
+    .badge-premium{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2px 12px;border-radius:30px;font-size:9px;}
+    .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
+    .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
   </style>
 </head>
 <body>
@@ -76,7 +111,7 @@
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
       <h2 style="text-align:center;">🔐 Admin Login</h2>
-      <p style="text-align:center;font-size:13px;color:#64748b;">Enter admin credentials</p>
+      <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">Enter admin credentials</p>
       <div class="input-group"><input type="text" id="adminUser" placeholder="Username" value="admin"></div>
       <div class="input-group"><input type="password" id="adminPass" placeholder="Password" value="admin123"></div>
       <button type="button" id="adminLoginBtn" class="btn">Login</button>
@@ -85,40 +120,45 @@
   </div>
 
   <div class="app-header">
-    <h1>🗳️ ELECTION PILOT <span style="font-size:10px; font-weight:normal;">|</span> <span style="font-size:11px;">Developed by SVR Innovation</span></h1>
-    <div class="developer-badge"><i class="fas fa-phone-alt"></i> Cell:8500172644</div>
-    <p style="font-size:11px;opacity:0.9;margin-top:5px;" id="headerSub">Corporator Election Campaign</p>
+    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:11px;font-weight:400;">SVR Innovation</span></h1>
+    <div class="developer-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
+    <p style="font-size:11px;opacity:0.85;margin-top:4px;" id="headerSub">Corporator Election Campaign</p>
     <div style="display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap;">
-      <span id="adminStatus" style="font-size:10px;background:rgba(255,255,255,0.2);padding:3px 12px;border-radius:30px;">👤 Public</span>
+      <span id="adminStatus" style="font-size:10px;background:var(--glass);padding:3px 14px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);">👤 Public</span>
       <button type="button" id="adminToggleBtn" class="lang-btn" style="font-size:10px;padding:3px 14px;">🔑 Admin</button>
-      <button type="button" id="adminLogoutBtn" class="lang-btn hidden" style="font-size:10px;padding:3px 14px;background:#ef4444;">🚪 Logout</button>
+      <button type="button" id="adminLogoutBtn" class="lang-btn hidden" style="font-size:10px;padding:3px 14px;background:#ef4444;border-color:#ef4444;">🚪 Logout</button>
     </div>
     <div class="lang-buttons">
       <button type="button" class="lang-btn" data-lang="te">తెలుగు</button>
       <button type="button" class="lang-btn active" data-lang="en">English</button>
     </div>
+    <div class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> <span id="syncText">Connecting...</span></div>
   </div>
 
   <!-- PAGE 1: HOME -->
   <div id="page-home" class="page active">
     <div class="card" style="text-align:center">
-      <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22200%22%3E%3Crect width=%22150%22 height=%22200%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2275%22 y=%22100%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
-      <h2 id="candidateName">Mana Vijay Anna</h2>
-      <p id="slogan" class="text-accent">"My Promise - Your Trust | Development First"</p>
-      <div style="display:flex;gap:10px;margin:12px 0;">
-        <a href="tel:+919396806527" class="btn" style="width:auto;flex:1"><i class="fas fa-phone"></i> <span id="callText">Call</span></a>
-        <a href="#" id="waLink" class="btn btn-accent" style="width:auto;flex:1"><i class="fab fa-whatsapp"></i> <span id="waText">WhatsApp</span></a>
+      <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%22170%22%3E%3Crect width=%22130%22 height=%22170%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2265%22 y=%2290%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
+      <h2 id="candidateName" style="font-size:20px;">Mana Vijay Anna</h2>
+      <p id="slogan" class="text-accent" style="font-size:14px;">"My Promise - Your Trust | Development First"</p>
+      <div style="display:flex;gap:10px;margin:14px 0;">
+        <a href="tel:+919396806527" class="btn" style="width:auto;flex:1;background:var(--primary);"><i class="fas fa-phone"></i> <span id="callText">Call</span></a>
+        <a href="#" id="waLink" class="btn btn-accent" style="width:auto;flex:1;"><i class="fab fa-whatsapp"></i> <span id="waText">WhatsApp</span></a>
       </div>
       <div style="display:flex;gap:8px;">
-        <button type="button" class="btn-outline" style="flex:1" onclick="goToPage('page-volunteer')"><i class="fas fa-hands-helping"></i> <span id="volBtnText">Join Volunteer</span></button>
-        <button type="button" class="btn-outline" style="flex:1" onclick="goToPage('page-issue')"><i class="fas fa-exclamation-triangle"></i> <span id="issueBtnText">Report Issue</span></button>
+        <button type="button" class="btn-outline" style="flex:1;padding:10px;" onclick="goToPage('page-volunteer')"><i class="fas fa-hands-helping"></i> <span id="volBtnText">Join Volunteer</span></button>
+        <button type="button" class="btn-outline" style="flex:1;padding:10px;" onclick="goToPage('page-issue')"><i class="fas fa-exclamation-triangle"></i> <span id="issueBtnText">Report Issue</span></button>
       </div>
     </div>
     <div class="card"><h3 id="promisesTitle">🎯 Key Promises</h3>
-      <ul style="margin-left:20px" id="promisesList"><li>✅ 24x7 Clean Water Supply</li><li>✅ Pothole-free Roads</li><li>✅ Door-to-door Garbage Collection</li><li>✅ Women Safety - CCTV Cameras</li></ul>
+      <ul style="margin-left:20px;list-style:none;padding:0;" id="promisesList">
+        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ 24x7 Clean Water Supply</li>
+        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ Pothole-free Roads</li>
+        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ Door-to-door Garbage Collection</li>
+        <li style="padding:6px 0;">✅ Women Safety - CCTV Cameras</li>
+      </ul>
     </div>
     <div class="card"><h3>📅 Upcoming Events</h3><div id="publicEventsList"></div></div>
-    <div class="card"><h3>🖼️ Gallery</h3><div class="gallery-grid" id="publicGalleryGrid"></div></div>
   </div>
 
   <!-- PAGE 2: DOOR TO DOOR -->
@@ -158,7 +198,7 @@
     </div>
   </div>
 
-  <!-- PAGE 4: VOLUNTEERS (Public Registration) -->
+  <!-- PAGE 4: VOLUNTEERS -->
   <div id="page-volunteer" class="page">
     <div class="card"><h3 id="volRegTitle">🤝 Volunteer Registration</h3>
       <div class="input-group"><input id="volNameReg" placeholder="Full Name"></div>
@@ -176,34 +216,26 @@
     <div id="dailyReportsList"></div>
   </div>
 
-  <!-- PAGE 5: BOOTH & REPORT -->
-  <div id="page-booth" class="page">
-    <div class="card"><h3 id="boothTitle">🗳️ Booth Management</h3>
-      <div class="input-group"><input id="boothNum" placeholder="Booth Number"></div>
-      <div class="input-group"><input id="boothAreaName" placeholder="Booth Area"></div>
-      <div class="input-group"><input id="totalVotersBooth" type="number" placeholder="Total Voters"></div>
-      <button type="button" id="addBoothBtn" class="btn"><span id="addBoothText">Add Booth</span></button>
+  <!-- PAGE 5: GALLERY -->
+  <div id="page-gallery" class="page">
+    <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery</h3>
+      <div id="publicGalleryEvents"></div>
     </div>
-    <div id="boothsList"></div>
-    <div class="card"><h3 id="topVolTitle">🏆 Top Volunteers</h3><div id="topVolunteers"></div></div>
   </div>
 
-  <!-- PAGE 6: TEAM MESSAGES - REMOVED FROM PUBLIC NAV -->
-
-  <!-- ADMIN PAGE (Includes Team Member Registration + Messaging) -->
+  <!-- ADMIN PAGE -->
   <div id="page-admin" class="page admin-only">
     <div class="card">
       <h3>🔐 Admin Dashboard <span class="admin-badge">Admin</span></h3>
       <div class="admin-stat-grid">
-        <div class="admin-stat-card">🏘️ <span id="adminTotalLabel">Total Houses</span><br><span id="adminTotalHouses">5000</span></div>
-        <div class="admin-stat-card">✅ <span id="adminCoveredLabel">Covered</span><br><span id="adminCoveredHouses">0</span></div>
-        <div class="admin-stat-card">🔄 <span id="adminFollowLabel">Follow-up</span><br><span id="adminFollowupCount">0</span></div>
-        <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><br><span id="adminIssueCount">0</span></div>
+        <div class="admin-stat-card">🏘️ <span id="adminTotalLabel">Total Houses</span><span id="adminTotalHouses">5000</span></div>
+        <div class="admin-stat-card">✅ <span id="adminCoveredLabel">Covered</span><span id="adminCoveredHouses">0</span></div>
+        <div class="admin-stat-card">🔄 <span id="adminFollowLabel">Follow-up</span><span id="adminFollowupCount">0</span></div>
+        <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><span id="adminIssueCount">0</span></div>
       </div>
-      <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText">Campaign Progress: 0%</p></div>
+      <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p></div>
     </div>
 
-    <!-- ADMIN: Register Team Members -->
     <div class="card">
       <h3>👥 Register Team Member <span class="admin-badge">Admin</span></h3>
       <div class="input-group"><input id="adminVolName" placeholder="Full Name"></div>
@@ -212,7 +244,6 @@
       <button type="button" id="adminAddVolunteerBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> <span id="adminAddVolText">Add Team Member</span></button>
     </div>
 
-    <!-- ADMIN: Send Message to Team -->
     <div class="card">
       <h3>📨 Send Message to Team <span class="admin-badge">Admin</span></h3>
       <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Send WhatsApp message to individual team members or broadcast to all</p>
@@ -237,13 +268,11 @@
       <div id="adminSendStatus" style="margin-top:8px;font-size:13px;"></div>
     </div>
 
-    <!-- ADMIN: Team Message History -->
     <div class="card">
       <h3>📨 Team Message History <span class="admin-badge">Admin</span></h3>
       <div id="adminTeamMsgHistory"></div>
     </div>
 
-    <!-- Existing Admin Sections -->
     <div class="card"><h3>🏠 All House Visits <span class="admin-badge">Admin</span></h3><div id="adminAllVisits"></div></div>
     <div class="card"><h3>📋 All Daily Reports <span class="admin-badge">Admin</span></h3><div id="adminAllReports"></div></div>
     <div class="card"><h3>⚠️ All Reported Issues <span class="admin-badge">Admin</span></h3><div id="adminIssuesList"></div></div>
@@ -253,11 +282,12 @@
       <h3>📊 Volunteer Reports <span class="admin-badge">Admin</span></h3>
       <div class="search-box">
         <select id="adminReportFilter"><option value="all">All Volunteers</option></select>
-        <button class="btn btn-sm" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
+        <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
       </div>
       <div id="adminFilteredReports"></div>
     </div>
     <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
+    
     <div class="card">
       <h3>📅 Manage Events</h3>
       <div class="input-group"><input id="eventTitle" placeholder="Event Title"></div>
@@ -266,40 +296,76 @@
       <button type="button" id="addEventBtn" class="btn"><span>Add Event</span></button>
       <div id="adminEventsList" style="margin-top:10px;"></div>
     </div>
+    
     <div class="card">
-      <h3>🖼️ Manage Gallery</h3>
-      <div class="input-group"><input type="file" id="galleryImageInput" accept="image/*"></div>
-      <div class="input-group"><input id="galleryCaption" placeholder="Image Caption"></div>
-      <button type="button" id="uploadGalleryBtn" class="btn"><span>Upload Image</span></button>
+      <h3>🖼️ Manage Gallery <span class="badge-premium">Images & Videos</span></h3>
+      <div class="input-group"><input type="file" id="galleryMediaInput" accept="image/*,video/*"></div>
+      <div class="input-group"><input id="galleryCaption" placeholder="Caption"></div>
+      <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-upload"></i> <span>Upload Media</span></button>
       <div id="adminGalleryGrid" class="gallery-grid" style="margin-top:10px;"></div>
+      <div id="adminVideoGrid" class="video-grid" style="margin-top:10px;"></div>
     </div>
   </div>
 
-  <!-- Bottom Navigation (5 tabs - removed Team Msg tab) -->
+  <!-- Bottom Navigation -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
     <div class="nav-item" data-page="page-doortodoor"><i class="fas fa-door-open"></i><span id="navD2D">Door to Door</span></div>
     <div class="nav-item" data-page="page-issue"><i class="fas fa-exclamation-triangle"></i><span id="navIssues">Issues</span></div>
     <div class="nav-item" data-page="page-volunteer"><i class="fas fa-users"></i><span id="navVol">Volunteers</span></div>
-    <div class="nav-item" data-page="page-booth"><i class="fas fa-chart-line"></i><span id="navBooth">Booth</span></div>
+    <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
   </div>
-  <div class="footer-text">📢 Campaign Team - Data Auto Saved Locally</div>
+  <div class="footer-text">📢 Campaign Team - Data Synced with Supabase</div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="close-btn" onclick="closeLightbox()">&times;</button>
+  <img id="lightboxImg" src="" alt="" style="display:none;">
+  <video id="lightboxVideo" controls style="display:none;"></video>
 </div>
 
 <a href="#" id="whatsappFloatBtn" class="whatsapp-float"><i class="fab fa-whatsapp"></i></a>
 
 <script>
 // ============================================================
-// COMPLETE WORKING APPLICATION - Admin Team Management
+// SUPABASE CONFIG - REPLACE WITH YOUR KEYS!
 // ============================================================
+const SUPABASE_URL = "https://maftocroavouozowdhhs.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hZnRvY3JvYXZvdW96b3dkaGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzI0NDMsImV4cCI6MjA5ODY0ODQ0M30.ie8XKTYuOi3YOh3E0bJ-aB2K7n0ipOqcRz4Os9ndqX4";
+let supabaseClient = null;
+let useSupabase = false;
+let syncInterval;
 
+// Initialize Supabase
+try {
+  if (SUPABASE_URL.includes("YOUR_PROJECT")) {
+    console.warn('⚠️ Please replace SUPABASE_URL and SUPABASE_ANON_KEY with your actual Supabase keys!');
+    useSupabase = false;
+    document.getElementById('syncText').textContent = 'Setup Required';
+    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  } else {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    useSupabase = true;
+    console.log('✅ Supabase connected');
+    document.getElementById('syncText').textContent = 'Cloud Connected';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+  }
+} catch(e) {
+  console.warn('⚠️ Supabase not available:', e.message);
+  document.getElementById('syncText').textContent = 'Local Mode (Offline)';
+  document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  useSupabase = false;
+}
+
+// ============================================================
 // DATA
+// ============================================================
 var appData = {
   visits: [],
   issues: [],
   volunteers: [],
   dailyReports: [],
-  booths: [],
   events: [],
   gallery: [],
   teamMessages: [],
@@ -332,12 +398,10 @@ var TE = {
   fullNamePlace: "పూర్తి పేరు", volMobilePlace: "మొబైల్ నంబర్", volAreaPlace: "ప్రాంతం / బూత్",
   daily: "📋 డైలీ రిపోర్ట్", report: "రిపోర్ట్ సమర్పించండి",
   dailyNamePlace: "మీ పేరు ఎంచుకోండి", housesPlace: "ఈ రోజు ఎన్ని ఇళ్లు సందర్శించారు?", notesPlace: "ప్రత్యేక విషయాలు / సమస్యలు",
-  booth: "🗳️ బూత్ నిర్వహణ", add: "బూత్ జోడించు", top: "🏆 టాప్ వాలంటీర్లు",
-  boothNumPlace: "బూత్ నంబర్", boothAreaPlace: "బూత్ ప్రాంతం", votersPlace: "మొత్తం ఓటర్లు",
-  navHome: "హోమ్", navD2D: "డోర్ టు డోర్", navIssues: "సమస్యలు", navVol: "వాలంటీర్లు", navBooth: "బూత్",
+  navHome: "హోమ్", navD2D: "డోర్ టు డోర్", navIssues: "సమస్యలు", navVol: "వాలంటీర్లు", navGallery: "గ్యాలరీ",
   coverage: "ప్రచార పురోగతి", status: "స్థితి", volunteer: "వాలంటీర్",
-  noVisits: "ఇంకా సందర్శనలు లేవు", noIssues: "సమస్యలు లేవు", noVols: "వాలంటీర్లు లేరు", noReports: "రిపోర్ట్లు లేవు", noBooths: "బూత్లు జోడించలేదు",
-  housesVisited: "ఇళ్లు సందర్శించారు", boothLabel: "బూత్", votersLabel: "ఓటర్లు", housesUnit: "ఇళ్లు", savedMsg: "సేవ్ చేయబడింది", submittedMsg: "నమోదైంది",
+  noVisits: "ఇంకా సందర్శనలు లేవు", noIssues: "సమస్యలు లేవు", noVols: "వాలంటీర్లు లేరు", noReports: "రిపోర్ట్లు లేవు",
+  housesVisited: "ఇళ్లు సందర్శించారు", housesUnit: "ఇళ్లు", savedMsg: "సేవ్ చేయబడింది", submittedMsg: "నమోదైంది",
   pending: "పెండింగ్", approved: "ఆమోదించబడింది", approve: "ఆమోదించు", noPending: "పెండింగ్ వాలంటీర్లు లేరు",
   events: "ఈవెంట్స్", gallery: "గ్యాలరీ", noEvents: "ఈవెంట్స్ లేవు", noGallery: "గ్యాలరీ ఖాళీగా ఉంది",
   admin: "అడ్మిన్", public: "పబ్లిక్", login: "లాగిన్", logout: "లాగౌట్",
@@ -366,12 +430,10 @@ var EN = {
   fullNamePlace: "Full Name", volMobilePlace: "Mobile Number", volAreaPlace: "Area / Booth",
   daily: "📋 Daily Activity Report", report: "Submit Report",
   dailyNamePlace: "Select Your Name", housesPlace: "How many houses visited today?", notesPlace: "Special notes / issues collected",
-  booth: "🗳️ Booth Management", add: "Add Booth", top: "🏆 Top Volunteers",
-  boothNumPlace: "Booth Number", boothAreaPlace: "Booth Area", votersPlace: "Total Voters",
-  navHome: "Home", navD2D: "Door to Door", navIssues: "Issues", navVol: "Volunteers", navBooth: "Booth",
+  navHome: "Home", navD2D: "Door to Door", navIssues: "Issues", navVol: "Volunteers", navGallery: "Gallery",
   coverage: "Campaign Progress", status: "Status", volunteer: "Volunteer",
-  noVisits: "No visits yet", noIssues: "No issues reported", noVols: "No volunteers", noReports: "No reports yet", noBooths: "No booths added",
-  housesVisited: "houses visited", boothLabel: "Booth", votersLabel: "Voters", housesUnit: "houses", savedMsg: "Saved", submittedMsg: "Submitted",
+  noVisits: "No visits yet", noIssues: "No issues reported", noVols: "No volunteers", noReports: "No reports yet",
+  housesVisited: "houses visited", housesUnit: "houses", savedMsg: "Saved", submittedMsg: "Submitted",
   pending: "Pending", approved: "Approved", approve: "Approve", noPending: "No pending volunteers",
   events: "Events", gallery: "Gallery", noEvents: "No events", noGallery: "Gallery empty",
   admin: "Admin", public: "Public", login: "Login", logout: "Logout",
@@ -391,73 +453,111 @@ function setLanguage(lang) {
   currentLang = lang;
   currentText = lang === "te" ? TE : EN;
   
-  document.getElementById("headerSub").innerText = currentText.headerSub;
-  document.getElementById("callText").innerText = currentText.call;
-  document.getElementById("waText").innerText = currentText.wa;
-  document.getElementById("volBtnText").innerText = currentText.vol;
-  document.getElementById("issueBtnText").innerText = currentText.issue;
-  document.getElementById("promisesTitle").innerHTML = currentText.promises;
-  document.getElementById("adminTotalLabel").innerText = currentText.total;
-  document.getElementById("adminCoveredLabel").innerText = currentText.covered;
-  document.getElementById("adminFollowLabel").innerText = currentText.follow;
-  document.getElementById("adminIssuesLabel").innerText = currentText.issuesLabel;
+  var elements = {
+    headerSub: document.getElementById("headerSub"),
+    callText: document.getElementById("callText"),
+    waText: document.getElementById("waText"),
+    volBtnText: document.getElementById("volBtnText"),
+    issueBtnText: document.getElementById("issueBtnText"),
+    promisesTitle: document.getElementById("promisesTitle"),
+    adminTotalLabel: document.getElementById("adminTotalLabel"),
+    adminCoveredLabel: document.getElementById("adminCoveredLabel"),
+    adminFollowLabel: document.getElementById("adminFollowLabel"),
+    adminIssuesLabel: document.getElementById("adminIssuesLabel"),
+    d2dTitle: document.getElementById("d2dTitle"),
+    saveText: document.getElementById("saveText"),
+    exportText: document.getElementById("exportText"),
+    houseNo: document.getElementById("houseNo"),
+    familyName: document.getElementById("familyName"),
+    mobileD2D: document.getElementById("mobileD2D"),
+    volunteerNameD2D: document.getElementById("volunteerNameD2D"),
+    issueFormTitle: document.getElementById("issueFormTitle"),
+    submitIssueText: document.getElementById("submitIssueText"),
+    issuePersonName: document.getElementById("issuePersonName"),
+    issuePersonMobile: document.getElementById("issuePersonMobile"),
+    issueArea: document.getElementById("issueArea"),
+    issueDesc: document.getElementById("issueDesc"),
+    volRegTitle: document.getElementById("volRegTitle"),
+    joinVolText: document.getElementById("joinVolText"),
+    volNameReg: document.getElementById("volNameReg"),
+    volMobileReg: document.getElementById("volMobileReg"),
+    volAreaReg: document.getElementById("volAreaReg"),
+    dailyReportTitle: document.getElementById("dailyReportTitle"),
+    submitReportText: document.getElementById("submitReportText"),
+    dailyVolName: document.getElementById("dailyVolName"),
+    housesVisitedDaily: document.getElementById("housesVisitedDaily"),
+    dailyNotes: document.getElementById("dailyNotes"),
+    navHome: document.getElementById("navHome"),
+    navD2D: document.getElementById("navD2D"),
+    navIssues: document.getElementById("navIssues"),
+    navVol: document.getElementById("navVol"),
+    navGallery: document.getElementById("navGallery"),
+    adminAddVolText: document.getElementById("adminAddVolText"),
+    adminSendMsgText: document.getElementById("adminSendMsgText"),
+    candidateName: document.getElementById("candidateName"),
+    slogan: document.getElementById("slogan")
+  };
   
-  document.getElementById("d2dTitle").innerHTML = currentText.d2d;
-  document.getElementById("saveText").innerText = currentText.save;
-  document.getElementById("exportText").innerText = currentText.export;
-  document.getElementById("houseNo").placeholder = currentText.housePlace;
-  document.getElementById("familyName").placeholder = currentText.familyPlace;
-  document.getElementById("mobileD2D").placeholder = currentText.mobilePlace;
-  document.getElementById("volunteerNameD2D").placeholder = currentText.volPlace;
-  
-  document.getElementById("issueFormTitle").innerHTML = currentText.issueForm;
-  document.getElementById("submitIssueText").innerText = currentText.submit;
-  document.getElementById("issuePersonName").placeholder = currentText.namePlace;
-  document.getElementById("issuePersonMobile").placeholder = currentText.mobilePlace2;
-  document.getElementById("issueArea").placeholder = currentText.areaPlace;
-  document.getElementById("issueDesc").placeholder = currentText.descPlace;
-  
-  document.getElementById("volRegTitle").innerHTML = currentText.volReg;
-  document.getElementById("joinVolText").innerText = currentText.join;
-  document.getElementById("volNameReg").placeholder = currentText.fullNamePlace;
-  document.getElementById("volMobileReg").placeholder = currentText.volMobilePlace;
-  document.getElementById("volAreaReg").placeholder = currentText.volAreaPlace;
-  document.getElementById("dailyReportTitle").innerHTML = currentText.daily;
-  document.getElementById("submitReportText").innerText = currentText.report;
-  document.getElementById("dailyVolName").placeholder = currentText.dailyNamePlace;
-  document.getElementById("housesVisitedDaily").placeholder = currentText.housesPlace;
-  document.getElementById("dailyNotes").placeholder = currentText.notesPlace;
-  
-  document.getElementById("boothTitle").innerHTML = currentText.booth;
-  document.getElementById("addBoothText").innerText = currentText.add;
-  document.getElementById("topVolTitle").innerHTML = currentText.top;
-  document.getElementById("boothNum").placeholder = currentText.boothNumPlace;
-  document.getElementById("boothAreaName").placeholder = currentText.boothAreaPlace;
-  document.getElementById("totalVotersBooth").placeholder = currentText.votersPlace;
-  
-  document.getElementById("navHome").innerText = currentText.navHome;
-  document.getElementById("navD2D").innerText = currentText.navD2D;
-  document.getElementById("navIssues").innerText = currentText.navIssues;
-  document.getElementById("navVol").innerText = currentText.navVol;
-  document.getElementById("navBooth").innerText = currentText.navBooth;
-  
-  document.getElementById("adminAddVolText").innerText = currentText.addTeamMember;
-  document.getElementById("adminSendMsgText").innerText = currentText.sendMsg;
+  if (elements.headerSub) elements.headerSub.innerText = currentText.headerSub;
+  if (elements.callText) elements.callText.innerText = currentText.call;
+  if (elements.waText) elements.waText.innerText = currentText.wa;
+  if (elements.volBtnText) elements.volBtnText.innerText = currentText.vol;
+  if (elements.issueBtnText) elements.issueBtnText.innerText = currentText.issue;
+  if (elements.promisesTitle) elements.promisesTitle.innerHTML = currentText.promises;
+  if (elements.adminTotalLabel) elements.adminTotalLabel.innerText = currentText.total;
+  if (elements.adminCoveredLabel) elements.adminCoveredLabel.innerText = currentText.covered;
+  if (elements.adminFollowLabel) elements.adminFollowLabel.innerText = currentText.follow;
+  if (elements.adminIssuesLabel) elements.adminIssuesLabel.innerText = currentText.issuesLabel;
+  if (elements.d2dTitle) elements.d2dTitle.innerHTML = currentText.d2d;
+  if (elements.saveText) elements.saveText.innerText = currentText.save;
+  if (elements.exportText) elements.exportText.innerText = currentText.export;
+  if (elements.houseNo) elements.houseNo.placeholder = currentText.housePlace;
+  if (elements.familyName) elements.familyName.placeholder = currentText.familyPlace;
+  if (elements.mobileD2D) elements.mobileD2D.placeholder = currentText.mobilePlace;
+  if (elements.volunteerNameD2D) elements.volunteerNameD2D.placeholder = currentText.volPlace;
+  if (elements.issueFormTitle) elements.issueFormTitle.innerHTML = currentText.issueForm;
+  if (elements.submitIssueText) elements.submitIssueText.innerText = currentText.submit;
+  if (elements.issuePersonName) elements.issuePersonName.placeholder = currentText.namePlace;
+  if (elements.issuePersonMobile) elements.issuePersonMobile.placeholder = currentText.mobilePlace2;
+  if (elements.issueArea) elements.issueArea.placeholder = currentText.areaPlace;
+  if (elements.issueDesc) elements.issueDesc.placeholder = currentText.descPlace;
+  if (elements.volRegTitle) elements.volRegTitle.innerHTML = currentText.volReg;
+  if (elements.joinVolText) elements.joinVolText.innerText = currentText.join;
+  if (elements.volNameReg) elements.volNameReg.placeholder = currentText.fullNamePlace;
+  if (elements.volMobileReg) elements.volMobileReg.placeholder = currentText.volMobilePlace;
+  if (elements.volAreaReg) elements.volAreaReg.placeholder = currentText.volAreaPlace;
+  if (elements.dailyReportTitle) elements.dailyReportTitle.innerHTML = currentText.daily;
+  if (elements.submitReportText) elements.submitReportText.innerText = currentText.report;
+  if (elements.dailyVolName) elements.dailyVolName.placeholder = currentText.dailyNamePlace;
+  if (elements.housesVisitedDaily) elements.housesVisitedDaily.placeholder = currentText.housesPlace;
+  if (elements.dailyNotes) elements.dailyNotes.placeholder = currentText.notesPlace;
+  if (elements.navHome) elements.navHome.innerText = currentText.navHome;
+  if (elements.navD2D) elements.navD2D.innerText = currentText.navD2D;
+  if (elements.navIssues) elements.navIssues.innerText = currentText.navIssues;
+  if (elements.navVol) elements.navVol.innerText = currentText.navVol;
+  if (elements.navGallery) elements.navGallery.innerText = currentText.navGallery;
+  if (elements.adminAddVolText) elements.adminAddVolText.innerText = currentText.addTeamMember;
+  if (elements.adminSendMsgText) elements.adminSendMsgText.innerText = currentText.sendMsg;
   
   var promisesUl = document.getElementById("promisesList");
-  promisesUl.innerHTML = currentText.promisesList.map(function(p) { return '<li>'+p+'</li>'; }).join("");
+  if (promisesUl) {
+    promisesUl.innerHTML = currentText.promisesList.map(function(p) { 
+      return '<li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">'+p+'</li>'; 
+    }).join("");
+  }
   
-  if(lang === "te") {
-    document.getElementById("candidateName").innerText = appData.config.candidateNameTe;
-    document.getElementById("slogan").innerText = appData.config.sloganTe;
+  if (lang === "te") {
+    if (elements.candidateName) elements.candidateName.innerText = appData.config.candidateNameTe;
+    if (elements.slogan) elements.slogan.innerText = appData.config.sloganTe;
   } else {
-    document.getElementById("candidateName").innerText = appData.config.candidateNameEn;
-    document.getElementById("slogan").innerText = appData.config.sloganEn;
+    if (elements.candidateName) elements.candidateName.innerText = appData.config.candidateNameEn;
+    if (elements.slogan) elements.slogan.innerText = appData.config.sloganEn;
   }
   
   var btns = document.querySelectorAll(".lang-btn");
   for(var i=0; i<btns.length; i++) btns[i].classList.remove("active");
-  document.querySelector('.lang-btn[data-lang="'+lang+'"]').classList.add("active");
+  var activeBtn = document.querySelector('.lang-btn[data-lang="'+lang+'"]');
+  if (activeBtn) activeBtn.classList.add("active");
   
   renderAll();
   updateAdminUI();
@@ -471,16 +571,22 @@ function loginAdmin() {
   var pass = document.getElementById("adminPass").value;
   if (user === "admin" && pass === "admin123") {
     isAdmin = true;
-    document.getElementById("loginOverlay").classList.add("hidden");
-    document.getElementById("adminStatus").innerText = "🔑 " + currentText.admin;
-    document.getElementById("adminToggleBtn").classList.add("hidden");
-    document.getElementById("adminLogoutBtn").classList.remove("hidden");
+    var overlay = document.getElementById("loginOverlay");
+    if (overlay) overlay.classList.add("hidden");
+    var adminStatus = document.getElementById("adminStatus");
+    if (adminStatus) adminStatus.innerText = "🔑 " + currentText.admin;
+    var toggleBtn = document.getElementById("adminToggleBtn");
+    if (toggleBtn) toggleBtn.classList.add("hidden");
+    var logoutBtn = document.getElementById("adminLogoutBtn");
+    if (logoutBtn) logoutBtn.classList.remove("hidden");
     var adminPages = document.querySelectorAll(".admin-only");
     for(var i=0; i<adminPages.length; i++) adminPages[i].classList.add("active");
-    document.getElementById("bottomNav").classList.add("admin-mode");
+    var bottomNav = document.getElementById("bottomNav");
+    if (bottomNav) bottomNav.classList.add("admin-mode");
     var allPages = document.querySelectorAll(".page:not(.admin-only)");
     for(var j=0; j<allPages.length; j++) allPages[j].classList.remove("active");
-    document.getElementById("page-admin").classList.add("active");
+    var adminPage = document.getElementById("page-admin");
+    if (adminPage) adminPage.classList.add("active");
     renderAll();
     updateAdminUI();
     populateFilters();
@@ -493,18 +599,24 @@ function loginAdmin() {
 
 function logoutAdmin() {
   isAdmin = false;
-  document.getElementById("adminStatus").innerText = "👤 " + currentText.public;
-  document.getElementById("adminToggleBtn").classList.remove("hidden");
-  document.getElementById("adminLogoutBtn").classList.add("hidden");
+  var adminStatus = document.getElementById("adminStatus");
+  if (adminStatus) adminStatus.innerText = "👤 " + currentText.public;
+  var toggleBtn = document.getElementById("adminToggleBtn");
+  if (toggleBtn) toggleBtn.classList.remove("hidden");
+  var logoutBtn = document.getElementById("adminLogoutBtn");
+  if (logoutBtn) logoutBtn.classList.add("hidden");
   var adminPages = document.querySelectorAll(".admin-only");
   for(var i=0; i<adminPages.length; i++) adminPages[i].classList.remove("active");
-  document.getElementById("bottomNav").classList.remove("admin-mode");
+  var bottomNav = document.getElementById("bottomNav");
+  if (bottomNav) bottomNav.classList.remove("admin-mode");
   var allPages = document.querySelectorAll(".page");
   for(var j=0; j<allPages.length; j++) allPages[j].classList.remove("active");
-  document.getElementById("page-home").classList.add("active");
+  var homePage = document.getElementById("page-home");
+  if (homePage) homePage.classList.add("active");
   var navs = document.querySelectorAll(".nav-item");
   for(var k=0; k<navs.length; k++) navs[k].classList.remove("active");
-  document.querySelector('.nav-item[data-page="page-home"]').classList.add("active");
+  var homeNav = document.querySelector('.nav-item[data-page="page-home"]');
+  if (homeNav) homeNav.classList.add("active");
   renderAll();
   populateFilters();
   populateVolunteerDropdowns();
@@ -514,12 +626,14 @@ function toggleAdminLogin() {
   if (isAdmin) {
     logoutAdmin();
   } else {
-    document.getElementById("loginOverlay").classList.remove("hidden");
+    var overlay = document.getElementById("loginOverlay");
+    if (overlay) overlay.classList.remove("hidden");
   }
 }
 
 function updateAdminUI() {
-  document.getElementById("adminIssueCount").innerText = appData.issues.length;
+  var issueCount = document.getElementById("adminIssueCount");
+  if (issueCount) issueCount.innerText = appData.issues.length;
 }
 
 // ======================= FILTERS =======================
@@ -570,7 +684,7 @@ function getAdminMessageTemplate(type) {
 // ======================= ADMIN SEND TEAM WHATSAPP =======================
 function adminSendTeamWhatsApp() {
   var sel = document.getElementById("adminTeamMemberSelect");
-  var selectedValue = sel.value;
+  var selectedValue = sel ? sel.value : 'all';
   
   var message = document.getElementById("adminCustomMessage").value;
   if (!message || message.trim() === '') {
@@ -580,7 +694,6 @@ function adminSendTeamWhatsApp() {
   
   var statusDiv = document.getElementById("adminSendStatus");
   
-  // Case 1: Send to ALL
   if (selectedValue === 'all') {
     var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
     if (approved.length === 0) {
@@ -589,25 +702,16 @@ function adminSendTeamWhatsApp() {
     }
     
     var sentCount = 0;
-    var failedCount = 0;
-    var statusMsg = '';
     
     for(var i=0; i<approved.length; i++) {
       var member = approved[i];
       var mobile = member.mobile;
-      if (!mobile || mobile.trim() === '') {
-        failedCount++;
-        continue;
-      }
+      if (!mobile || mobile.trim() === '') continue;
       
       var phone = mobile.replace(/[^0-9]/g, '');
-      if (phone.length < 10) {
-        failedCount++;
-        continue;
-      }
+      if (phone.length < 10) continue;
       if (phone.length === 10) phone = '91' + phone;
       
-      // Save message to history
       appData.teamMessages.push({
         id: Date.now().toString() + '_' + i,
         timestamp: new Date().toLocaleString(),
@@ -620,7 +724,6 @@ function adminSendTeamWhatsApp() {
       
       sentCount++;
       
-      // Open WhatsApp in new tab (only first one or use a different approach)
       if (i === 0) {
         var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
         window.open(url, '_blank');
@@ -628,16 +731,17 @@ function adminSendTeamWhatsApp() {
     }
     
     saveData();
-    statusDiv.innerHTML = '✅ Sent to ' + sentCount + ' team members' + (failedCount > 0 ? ' (Failed: ' + failedCount + ')' : '');
-    statusDiv.style.color = '#16a34a';
-    alert('📤 ' + currentText.msgSent + '\n\nSent to ' + sentCount + ' team members.\nWhatsApp will open for the first member. You can send to others from your WhatsApp history.');
+    if (statusDiv) {
+      statusDiv.innerHTML = '✅ Sent to ' + sentCount + ' team members';
+      statusDiv.style.color = '#16a34a';
+    }
+    alert('📤 ' + currentText.msgSent + '\n\nSent to ' + sentCount + ' team members.');
     
     renderAll();
     populateAdminTeamDropdown();
     return;
   }
   
-  // Case 2: Send to Individual
   var memberId = selectedValue;
   if (!memberId) {
     alert("Please select a team member!");
@@ -670,7 +774,6 @@ function adminSendTeamWhatsApp() {
   }
   if (phone.length === 10) phone = '91' + phone;
   
-  // Save message to history
   appData.teamMessages.push({
     id: Date.now().toString(),
     timestamp: new Date().toLocaleString(),
@@ -682,13 +785,13 @@ function adminSendTeamWhatsApp() {
   });
   saveData();
   
-  // Open WhatsApp
   var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
   window.open(url, '_blank');
   
-  statusDiv.innerHTML = '✅ ' + currentText.msgSent + ' to ' + member.name;
-  statusDiv.style.color = '#16a34a';
-  alert('📤 ' + currentText.msgSent + '\n\nTo: ' + member.name + '\n' + message.substring(0, 100) + '...');
+  if (statusDiv) {
+    statusDiv.innerHTML = '✅ ' + currentText.msgSent + ' to ' + member.name;
+    statusDiv.style.color = '#16a34a';
+  }
   
   renderAll();
   populateAdminTeamDropdown();
@@ -705,7 +808,6 @@ function adminAddTeamMember() {
     return;
   }
   
-  // Check if already exists
   var exists = false;
   for(var i=0; i<appData.volunteers.length; i++) {
     if (appData.volunteers[i].mobile === mobile) {
@@ -723,7 +825,7 @@ function adminAddTeamMember() {
     name: name,
     mobile: mobile,
     area: area || '',
-    status: "approved" // Auto-approved when admin adds
+    status: "approved"
   });
   
   saveData();
@@ -743,13 +845,13 @@ function renderAdminAllVisits() {
   var cont = document.getElementById("adminAllVisits");
   if (!cont) return;
   if (appData.visits.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noVisitsYet+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-door-open"></i>'+currentText.noVisitsYet+'</div>';
     return;
   }
   var html = '';
   for(var i=appData.visits.length-1; i>=0; i--) {
     var v = appData.visits[i];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'</span><br><span style="font-size:12px;color:#64748b;">'+currentText.volunteer+': '+v.volunteer+'</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\''+(v.id || v.timestamp || i)+'\')">🗑️</button></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'</span><br><span style="font-size:12px;color:#64748b;">'+currentText.volunteer+': '+v.volunteer+'</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\''+(v.id || v.timestamp || i)+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
 }
@@ -769,13 +871,13 @@ function renderAdminAllReports() {
   var cont = document.getElementById("adminAllReports");
   if (!cont) return;
   if (appData.dailyReports.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noReportsYet+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-file-alt"></i>'+currentText.noReportsYet+'</div>';
     return;
   }
   var html = '';
   for(var i=appData.dailyReports.length-1; i>=0; i--) {
     var r = appData.dailyReports[i];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || i)+'\')">🗑️</button></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || i)+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
 }
@@ -795,7 +897,7 @@ function renderAdminIssues() {
   var cont = document.getElementById("adminIssuesList");
   if (!cont) return;
   if (appData.issues.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noIssuesReported+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i>'+currentText.noIssuesReported+'</div>';
     return;
   }
   var html = '';
@@ -823,7 +925,7 @@ function renderPendingVolunteers() {
   if (!cont) return;
   var pending = appData.volunteers.filter(function(v) { return v.status === "pending"; });
   if (pending.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noPending+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-user-check"></i>'+currentText.noPending+'</div>';
     return;
   }
   var html = '';
@@ -839,7 +941,7 @@ function renderApprovedVolunteers() {
   if (!cont) return;
   var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
   if (approved.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noApprovedVols+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i>'+currentText.noApprovedVols+'</div>';
     return;
   }
   var html = '';
@@ -889,10 +991,11 @@ function deleteApprovedVolunteer(id) {
 function renderAdminFilteredReports() {
   var cont = document.getElementById("adminFilteredReports");
   if (!cont) return;
-  var filter = document.getElementById("adminReportFilter").value;
+  var filter = document.getElementById("adminReportFilter");
+  var filterVal = filter ? filter.value : 'all';
   var reports = appData.dailyReports;
-  if (filter !== "all") {
-    reports = reports.filter(function(r) { return r.volunteer === filter; });
+  if (filterVal !== "all") {
+    reports = reports.filter(function(r) { return r.volunteer === filterVal; });
   }
   if (reports.length === 0) {
     cont.innerHTML = '<div class="card">'+currentText.noReports+'</div>';
@@ -943,23 +1046,33 @@ function renderAdminTeamMessageHistory() {
   var cont = document.getElementById("adminTeamMsgHistory");
   if (!cont) return;
   if (appData.teamMessages.length === 0) {
-    cont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noTeamMessages+'</p>';
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-envelope"></i>'+currentText.noTeamMessages+'</div>';
     return;
   }
   var html = '';
   for(var i=appData.teamMessages.length-1; i>=0; i--) {
     var m = appData.teamMessages[i];
     var isBulk = m.isBulk ? ' <span class="badge-all">📢 BULK</span>' : '';
-    html += '<div class="team-msg-box"><div><strong>👤 '+m.memberName+'</strong> <span style="font-size:11px;color:#64748b;">'+m.timestamp+'</span>'+isBulk+'</div><div style="font-size:13px;margin-top:4px;">'+m.message+'</div><div class="sent">✅ Sent by: '+m.sentBy+' | 📱 '+m.memberMobile+'</div></div>';
+    html += '<div class="team-msg-box" id="msg-'+m.id+'"><div><strong>👤 '+m.memberName+'</strong> <span style="font-size:11px;color:#64748b;">'+m.timestamp+'</span>'+isBulk;
+    html += '<button class="del-msg" onclick="deleteTeamMessage(\''+m.id+'\')">🗑️</button>';
+    html += '</div><div style="font-size:13px;margin-top:4px;">'+m.message+'</div><div class="sent">✅ Sent by: '+m.sentBy+' | 📱 '+m.memberMobile+'</div></div>';
   }
   cont.innerHTML = html;
+}
+
+function deleteTeamMessage(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.teamMessages = appData.teamMessages.filter(function(m) { return m.id !== id; });
+    saveData();
+    renderAll();
+  }
 }
 
 function renderEvents() {
   var pubCont = document.getElementById("publicEventsList");
   if (pubCont) {
     if (appData.events.length === 0) {
-      pubCont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noEvents+'</p>';
+      pubCont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
     } else {
       var html = '';
       for(var i=appData.events.length-1; i>=0; i--) {
@@ -972,7 +1085,7 @@ function renderEvents() {
   var adminCont = document.getElementById("adminEventsList");
   if (adminCont && isAdmin) {
     if (appData.events.length === 0) {
-      adminCont.innerHTML = '<p style="color:#94a3b8;">'+currentText.noEvents+'</p>';
+      adminCont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
     } else {
       var html = '';
       for(var i=appData.events.length-1; i>=0; i--) {
@@ -992,36 +1105,82 @@ function deleteEvent(id) {
   }
 }
 
+// GALLERY RENDERING
 function renderGallery() {
-  var pubCont = document.getElementById("publicGalleryGrid");
+  var pubCont = document.getElementById("publicGalleryEvents");
+  var adminImgCont = document.getElementById("adminGalleryGrid");
+  var adminVidCont = document.getElementById("adminVideoGrid");
+
   if (pubCont) {
-    if (appData.gallery.length === 0) {
-      pubCont.innerHTML = '<p style="color:#94a3b8;grid-column:1/4;">'+currentText.noGallery+'</p>';
+    var html = '';
+    html += '<h4 style="margin-top:0;">📅 Events</h4>';
+    if (appData.events.length === 0) {
+      html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
+    } else {
+      for(var i=appData.events.length-1; i>=0; i--) {
+        var e = appData.events[i];
+        html += '<div class="event-card"><b>'+e.title+'</b><br>📅 '+e.date+'<br><span style="font-size:13px;color:#64748b;">'+(e.desc || '')+'</span></div>';
+      }
+    }
+    
+    var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
+    html += '<h4 style="margin-top:14px;">🖼️ Photos</h4>';
+    if (images.length === 0) {
+      html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-image"></i>No photos</div>';
+    } else {
+      html += '<div class="gallery-grid">';
+      for(var i=0; i<images.length; i++) {
+        var g = images[i];
+        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'" onclick="openLightbox(\''+g.data+'\',\'image\')"></div>';
+      }
+      html += '</div>';
+    }
+    
+    var videos = appData.gallery.filter(function(g) { return g.type === 'video'; });
+    html += '<h4 style="margin-top:14px;">🎬 Videos</h4>';
+    if (videos.length === 0) {
+      html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-video"></i>No videos</div>';
+    } else {
+      html += '<div class="video-grid">';
+      for(var i=0; i<videos.length; i++) {
+        var g = videos[i];
+        html += '<div><video src="'+g.data+'" controls onclick="event.stopPropagation();"></video><div style="font-size:10px;color:#64748b;text-align:center;padding:2px;">'+ (g.caption || '') +'</div></div>';
+      }
+      html += '</div>';
+    }
+    pubCont.innerHTML = html;
+  }
+
+  var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
+  if (adminImgCont && isAdmin) {
+    if (images.length === 0) {
+      adminImgCont.innerHTML = '<div class="empty-state" style="grid-column:1/4;"><i class="fas fa-image"></i>No images</div>';
     } else {
       var html = '';
-      for(var i=0; i<appData.gallery.length; i++) {
-        var g = appData.gallery[i];
-        html += '<img src="'+g.data+'" alt="'+ (g.caption || 'Gallery image') +'" title="'+ (g.caption || '') +'" style="cursor:pointer;" onclick="alert(\''+ (g.caption || '') +'\')">';
+      for(var i=0; i<images.length; i++) {
+        var g = images[i];
+        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'"><button class="delete-btn" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button></div>';
       }
-      pubCont.innerHTML = html;
+      adminImgCont.innerHTML = html;
     }
   }
-  var adminCont = document.getElementById("adminGalleryGrid");
-  if (adminCont && isAdmin) {
-    if (appData.gallery.length === 0) {
-      adminCont.innerHTML = '<p style="color:#94a3b8;grid-column:1/4;">'+currentText.noGallery+'</p>';
+
+  var videos = appData.gallery.filter(function(g) { return g.type === 'video'; });
+  if (adminVidCont && isAdmin) {
+    if (videos.length === 0) {
+      adminVidCont.innerHTML = '<div class="empty-state" style="grid-column:1/3;"><i class="fas fa-video"></i>No videos</div>';
     } else {
       var html = '';
-      for(var i=0; i<appData.gallery.length; i++) {
-        var g = appData.gallery[i];
-        html += '<div style="position:relative;"><img src="'+g.data+'" alt="'+ (g.caption || 'Gallery image') +'"><button class="btn btn-danger btn-sm" style="position:absolute;top:2px;right:2px;padding:2px 8px;font-size:10px;width:auto;" onclick="deleteGalleryImage(\''+g.id+'\')">✕</button></div>';
+      for(var i=0; i<videos.length; i++) {
+        var g = videos[i];
+        html += '<div style="position:relative;"><video src="'+g.data+'" controls></video><button class="delete-btn" style="position:absolute;top:4px;right:4px;" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button><div style="font-size:10px;color:#64748b;text-align:center;">'+ (g.caption || '') +'</div></div>';
       }
-      adminCont.innerHTML = html;
+      adminVidCont.innerHTML = html;
     }
   }
 }
 
-function deleteGalleryImage(id) {
+function deleteGalleryItem(id) {
   if (confirm(currentText.confirmDelete)) {
     appData.gallery = appData.gallery.filter(function(g) { return g.id !== id; });
     saveData();
@@ -1029,23 +1188,124 @@ function deleteGalleryImage(id) {
   }
 }
 
-function uploadGalleryImage() {
-  var fileInput = document.getElementById("galleryImageInput");
+// LIGHTBOX
+function openLightbox(src, type) {
+  var lb = document.getElementById("lightbox");
+  var img = document.getElementById("lightboxImg");
+  var video = document.getElementById("lightboxVideo");
+  if (!lb) return;
+  img.style.display = 'none';
+  video.style.display = 'none';
+  if (type === 'image') {
+    img.src = src;
+    img.style.display = 'block';
+    video.pause();
+  } else if (type === 'video') {
+    video.src = src;
+    video.style.display = 'block';
+    video.load();
+    video.play();
+    img.style.display = 'none';
+  }
+  lb.classList.add('active');
+}
+
+function closeLightbox() {
+  var lb = document.getElementById("lightbox");
+  var video = document.getElementById("lightboxVideo");
+  if (video) {
+    video.pause();
+    video.src = '';
+  }
+  if (lb) lb.classList.remove('active');
+}
+
+// UPLOAD MEDIA - Supabase Storage
+async function uploadGalleryMedia() {
+  var fileInput = document.getElementById("galleryMediaInput");
   var caption = document.getElementById("galleryCaption").value;
   var file = fileInput.files[0];
-  if (!file) { alert("Please select an image"); return; }
+  if (!file) { alert("Please select an image or video"); return; }
+  
+  var type = file.type.startsWith('video') ? 'video' : 'image';
+  var uploadBtn = document.getElementById('uploadGalleryBtn');
+  if (!uploadBtn) return;
+  var originalText = uploadBtn.innerHTML;
+  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  uploadBtn.disabled = true;
+  
+  // Try Supabase Storage upload
+  if (useSupabase && supabaseClient) {
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 15) + '.' + fileExt;
+      const filePath = 'gallery/' + fileName;
+      
+      const { data: uploadData, error: uploadError } = await supabaseClient
+        .storage
+        .from('gallery')
+        .upload(filePath, file);
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+      
+      // Get public URL
+      const { data: urlData } = supabaseClient
+        .storage
+        .from('gallery')
+        .getPublicUrl(filePath);
+      
+      const publicUrl = urlData.publicUrl;
+      
+      appData.gallery.push({
+        id: Date.now().toString(),
+        type: type,
+        data: publicUrl,
+        caption: caption || ""
+      });
+      
+      saveData();
+      document.getElementById("galleryMediaInput").value = "";
+      document.getElementById("galleryCaption").value = "";
+      uploadBtn.innerHTML = originalText;
+      uploadBtn.disabled = false;
+      renderAll();
+      alert("✅ Uploaded to Supabase cloud!");
+      
+    } catch (error) {
+      console.error('Supabase upload error:', error);
+      uploadBtn.innerHTML = originalText;
+      uploadBtn.disabled = false;
+      // Fallback to local
+      fallbackUpload(file, caption, type);
+    }
+  } else {
+    fallbackUpload(file, caption, type);
+    uploadBtn.innerHTML = originalText;
+    uploadBtn.disabled = false;
+  }
+}
+
+function fallbackUpload(file, caption, type) {
   var reader = new FileReader();
   reader.onload = function(e) {
     appData.gallery.push({
       id: Date.now().toString(),
+      type: type,
       data: e.target.result,
       caption: caption || ""
     });
     saveData();
-    document.getElementById("galleryImageInput").value = "";
+    document.getElementById("galleryMediaInput").value = "";
     document.getElementById("galleryCaption").value = "";
     renderAll();
-    alert("Image uploaded successfully!");
+    alert("✅ Media saved locally!");
+  };
+  reader.onerror = function() {
+    alert("❌ Failed to read file.");
   };
   reader.readAsDataURL(file);
 }
@@ -1054,13 +1314,20 @@ function updateAdminStats() {
   var total = 5000;
   var covered = appData.visits.filter(function(v) { return v.status === "Visited"; }).length;
   var followups = appData.visits.filter(function(v) { return (v.status || "").includes("Follow-up"); }).length;
-  document.getElementById("adminTotalHouses").innerText = total;
-  document.getElementById("adminCoveredHouses").innerText = covered;
-  document.getElementById("adminFollowupCount").innerText = followups;
-  document.getElementById("adminIssueCount").innerText = appData.issues.length;
+  var totalHouses = document.getElementById("adminTotalHouses");
+  var coveredHouses = document.getElementById("adminCoveredHouses");
+  var followupCount = document.getElementById("adminFollowupCount");
+  var issueCount = document.getElementById("adminIssueCount");
+  var coverageFill = document.getElementById("adminCoverageFill");
+  var coverageText = document.getElementById("adminCoverageText");
+  
+  if (totalHouses) totalHouses.innerText = total;
+  if (coveredHouses) coveredHouses.innerText = covered;
+  if (followupCount) followupCount.innerText = followups;
+  if (issueCount) issueCount.innerText = appData.issues.length;
   var percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
-  document.getElementById("adminCoverageFill").style.width = percent + "%";
-  document.getElementById("adminCoverageText").innerHTML = currentText.coverage + ': ' + percent.toFixed(1) + '% (' + covered + '/' + total + ')';
+  if (coverageFill) coverageFill.style.width = percent + "%";
+  if (coverageText) coverageText.innerHTML = currentText.coverage + ': ' + percent.toFixed(1) + '% (' + covered + '/' + total + ')';
 }
 
 function populateVolunteerDropdowns() {
@@ -1118,35 +1385,6 @@ function renderDailyReports() {
   cont.innerHTML = html;
 }
 
-function renderBooths() { 
-  var cont = document.getElementById("boothsList"); 
-  if(!cont) return;
-  if(appData.booths.length === 0) { cont.innerHTML = '<div class="card">'+currentText.noBooths+'</div>'; return; }
-  var html = '<h3>🗳️ '+currentText.booth+'</h3>';
-  for(var i=0; i<appData.booths.length; i++) {
-    var b = appData.booths[i];
-    html += '<div class="card"><b>'+currentText.boothLabel+' '+b.number+'</b> - '+b.area+'<br>📊 '+currentText.votersLabel+': '+b.voters+'</div>';
-  }
-  cont.innerHTML = html;
-}
-
-function renderTopVolunteers() { 
-  var cont = document.getElementById("topVolunteers"); 
-  if(!cont) return;
-  var reportCounts = {};
-  for(var i=0; i<appData.dailyReports.length; i++) {
-    var r = appData.dailyReports[i];
-    reportCounts[r.volunteer] = (reportCounts[r.volunteer]||0) + (parseInt(r.housesVisited)||0);
-  }
-  var sorted = Object.keys(reportCounts).sort(function(a,b) { return reportCounts[b] - reportCounts[a]; }).slice(0,3);
-  if(sorted.length === 0) { cont.innerHTML = '<p>'+currentText.noReports+'</p>'; return; }
-  var html = '';
-  for(var i=0; i<sorted.length; i++) {
-    html += '<p>🏆 '+sorted[i]+' : '+reportCounts[sorted[i]]+' '+currentText.housesUnit+'</p>';
-  }
-  cont.innerHTML = html;
-}
-
 function renderAll() {
   renderVisits();
   renderAdminAllVisits();
@@ -1158,8 +1396,6 @@ function renderAll() {
   renderDailyReports();
   renderAdminFilteredReports();
   renderAdminFullReport();
-  renderBooths();
-  renderTopVolunteers();
   renderEvents();
   renderGallery();
   renderAdminTeamMessageHistory();
@@ -1175,6 +1411,7 @@ function loadData() {
       var savedData = JSON.parse(saved);
       savedData.config = appData.config;
       if (!savedData.teamMessages) savedData.teamMessages = [];
+      if (!savedData.gallery) savedData.gallery = [];
       for(var i=0; i<savedData.volunteers.length; i++) {
         if (!savedData.volunteers[i].status) savedData.volunteers[i].status = "pending";
       }
@@ -1196,12 +1433,93 @@ function saveData() {
   updateAdminUI();
   populateFilters();
   populateVolunteerDropdowns();
+  
+  // Sync to Supabase if available
+  if (useSupabase && supabaseClient) {
+    syncToSupabase();
+  }
+}
+
+// Supabase Sync Functions
+async function syncToSupabase() {
+  if (!useSupabase || !supabaseClient) return;
+  
+  try {
+    // Sync all data to Supabase
+    const dataToSync = {
+      visits: appData.visits || [],
+      issues: appData.issues || [],
+      volunteers: appData.volunteers || [],
+      dailyReports: appData.dailyReports || [],
+      events: appData.events || [],
+      teamMessages: appData.teamMessages || [],
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Save to each table individually
+    await supabaseClient.from('visits').upsert(dataToSync.visits, { onConflict: 'id' });
+    await supabaseClient.from('issues').upsert(dataToSync.issues, { onConflict: 'id' });
+    await supabaseClient.from('volunteers').upsert(dataToSync.volunteers, { onConflict: 'id' });
+    await supabaseClient.from('daily_reports').upsert(dataToSync.dailyReports, { onConflict: 'id' });
+    await supabaseClient.from('events').upsert(dataToSync.events, { onConflict: 'id' });
+    await supabaseClient.from('team_messages').upsert(dataToSync.teamMessages, { onConflict: 'id' });
+    
+    document.getElementById('syncText').textContent = 'Synced ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    
+  } catch(err) {
+    console.warn('Sync error:', err.message);
+    document.getElementById('syncText').textContent = 'Sync pending';
+    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  }
+}
+
+async function loadFromSupabase() {
+  if (!useSupabase || !supabaseClient) return;
+  
+  try {
+    // Load all data from Supabase
+    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, messagesRes] = await Promise.all([
+      supabaseClient.from('visits').select('*'),
+      supabaseClient.from('issues').select('*'),
+      supabaseClient.from('volunteers').select('*'),
+      supabaseClient.from('daily_reports').select('*'),
+      supabaseClient.from('events').select('*'),
+      supabaseClient.from('team_messages').select('*')
+    ]);
+    
+    if (visitsRes.data) appData.visits = visitsRes.data;
+    if (issuesRes.data) appData.issues = issuesRes.data;
+    if (volunteersRes.data) {
+      // Ensure status field exists
+      appData.volunteers = volunteersRes.data.map(v => ({ ...v, status: v.status || 'pending' }));
+    }
+    if (reportsRes.data) appData.dailyReports = reportsRes.data;
+    if (eventsRes.data) appData.events = eventsRes.data;
+    if (messagesRes.data) appData.teamMessages = messagesRes.data;
+    
+    if (!appData.gallery) appData.gallery = [];
+    saveData();
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+    
+    document.getElementById('syncText').textContent = 'Cloud Loaded ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    
+  } catch(err) {
+    console.warn('Load from Supabase error:', err.message);
+  }
 }
 
 function applyConfig() {
-  document.getElementById("candidatePhoto").src = appData.config.photo;
-  document.getElementById("waLink").href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
-  document.getElementById("whatsappFloatBtn").href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
+  var photo = document.getElementById("candidatePhoto");
+  var waLink = document.getElementById("waLink");
+  var floatBtn = document.getElementById("whatsappFloatBtn");
+  if (photo) photo.src = appData.config.photo;
+  if (waLink) waLink.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
+  if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
 }
 
 // ======================= NAVIGATION =======================
@@ -1232,181 +1550,201 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Save Visit
-  document.getElementById("saveVisitBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var houseNo = document.getElementById("houseNo").value; 
-    if(!houseNo){ alert("Please enter house number"); return; } 
-    appData.visits.push({
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      houseNo: houseNo, 
-      familyName: document.getElementById("familyName").value, 
-      mobile: document.getElementById("mobileD2D").value, 
-      status: document.getElementById("visitStatus").value, 
-      volunteer: document.getElementById("volunteerNameD2D").value,
-      date: new Date()
-    }); 
-    saveData(); 
-    document.getElementById("houseNo").value=""; 
-    document.getElementById("familyName").value=""; 
-    document.getElementById("mobileD2D").value=""; 
-    alert(currentText.savedMsg); 
-  });
+  var saveVisitBtn = document.getElementById("saveVisitBtn");
+  if (saveVisitBtn) {
+    saveVisitBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var houseNo = document.getElementById("houseNo").value; 
+      if(!houseNo){ alert("Please enter house number"); return; } 
+      appData.visits.push({
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        houseNo: houseNo, 
+        familyName: document.getElementById("familyName").value, 
+        mobile: document.getElementById("mobileD2D").value, 
+        status: document.getElementById("visitStatus").value, 
+        volunteer: document.getElementById("volunteerNameD2D").value,
+        date: new Date()
+      }); 
+      saveData(); 
+      document.getElementById("houseNo").value=""; 
+      document.getElementById("familyName").value=""; 
+      document.getElementById("mobileD2D").value=""; 
+      alert(currentText.savedMsg); 
+    });
+  }
 
   // Save Issue
-  document.getElementById("saveIssueBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var name = document.getElementById("issuePersonName").value; 
-    if(!name){ alert("Please enter your name"); return; } 
-    appData.issues.push({
-      id: Date.now().toString(),
-      name: name, 
-      mobile: document.getElementById("issuePersonMobile").value, 
-      area: document.getElementById("issueArea").value, 
-      category: document.getElementById("issueCategory").value, 
-      desc: document.getElementById("issueDesc").value
-    }); 
-    saveData(); 
-    document.getElementById("issuePersonName").value=""; 
-    document.getElementById("issuePersonMobile").value=""; 
-    document.getElementById("issueArea").value=""; 
-    document.getElementById("issueDesc").value=""; 
-    alert(currentText.submittedMsg); 
-  });
+  var saveIssueBtn = document.getElementById("saveIssueBtn");
+  if (saveIssueBtn) {
+    saveIssueBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var name = document.getElementById("issuePersonName").value; 
+      if(!name){ alert("Please enter your name"); return; } 
+      appData.issues.push({
+        id: Date.now().toString(),
+        name: name, 
+        mobile: document.getElementById("issuePersonMobile").value, 
+        area: document.getElementById("issueArea").value, 
+        category: document.getElementById("issueCategory").value, 
+        desc: document.getElementById("issueDesc").value
+      }); 
+      saveData(); 
+      document.getElementById("issuePersonName").value=""; 
+      document.getElementById("issuePersonMobile").value=""; 
+      document.getElementById("issueArea").value=""; 
+      document.getElementById("issueDesc").value=""; 
+      alert(currentText.submittedMsg); 
+    });
+  }
 
   // Public Volunteer Registration
-  document.getElementById("addVolunteerRegBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var name = document.getElementById("volNameReg").value; 
-    var mobile = document.getElementById("volMobileReg").value; 
-    if(!name || !mobile){ alert("Please fill volunteer details"); return; } 
-    var exists = false;
-    for(var i=0; i<appData.volunteers.length; i++) {
-      if (appData.volunteers[i].mobile === mobile) { exists = true; break; }
-    }
-    if (exists) { alert("This mobile number is already registered!"); return; }
-    appData.volunteers.push({
-      id: Date.now().toString(),
-      name: name, 
-      mobile: mobile, 
-      area: document.getElementById("volAreaReg").value,
-      status: "pending"
-    }); 
-    saveData(); 
-    document.getElementById("volNameReg").value=""; 
-    document.getElementById("volMobileReg").value=""; 
-    document.getElementById("volAreaReg").value=""; 
-    alert("Registration submitted! Waiting for admin approval.");
-    populateFilters();
-    populateVolunteerDropdowns();
-  });
+  var addVolunteerRegBtn = document.getElementById("addVolunteerRegBtn");
+  if (addVolunteerRegBtn) {
+    addVolunteerRegBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var name = document.getElementById("volNameReg").value; 
+      var mobile = document.getElementById("volMobileReg").value; 
+      if(!name || !mobile){ alert("Please fill volunteer details"); return; } 
+      var exists = false;
+      for(var i=0; i<appData.volunteers.length; i++) {
+        if (appData.volunteers[i].mobile === mobile) { exists = true; break; }
+      }
+      if (exists) { alert("This mobile number is already registered!"); return; }
+      appData.volunteers.push({
+        id: Date.now().toString(),
+        name: name, 
+        mobile: mobile, 
+        area: document.getElementById("volAreaReg").value,
+        status: "pending"
+      }); 
+      saveData(); 
+      document.getElementById("volNameReg").value=""; 
+      document.getElementById("volMobileReg").value=""; 
+      document.getElementById("volAreaReg").value=""; 
+      alert("Registration submitted! Waiting for admin approval.");
+      populateFilters();
+      populateVolunteerDropdowns();
+    });
+  }
 
   // Submit Daily Report
-  document.getElementById("submitDailyReportBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var vol = document.getElementById("dailyVolName").value; 
-    var houses = document.getElementById("housesVisitedDaily").value; 
-    if(!vol || !houses){ alert("Please fill report details"); return; } 
-    appData.dailyReports.push({
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      volunteer: vol, 
-      housesVisited: houses, 
-      notes: document.getElementById("dailyNotes").value
-    }); 
-    saveData(); 
-    document.getElementById("housesVisitedDaily").value=""; 
-    document.getElementById("dailyNotes").value=""; 
-    alert(currentText.report); 
-  });
-
-  // Add Booth
-  document.getElementById("addBoothBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var num = document.getElementById("boothNum").value; 
-    var area = document.getElementById("boothAreaName").value; 
-    if(!num || !area){ alert("Please fill booth details"); return; } 
-    appData.booths.push({
-      number: num, 
-      area: area, 
-      voters: document.getElementById("totalVotersBooth").value
-    }); 
-    saveData(); 
-    document.getElementById("boothNum").value=""; 
-    document.getElementById("boothAreaName").value=""; 
-    document.getElementById("totalVotersBooth").value=""; 
-    alert(currentText.add); 
-  });
+  var submitDailyReportBtn = document.getElementById("submitDailyReportBtn");
+  if (submitDailyReportBtn) {
+    submitDailyReportBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var vol = document.getElementById("dailyVolName").value; 
+      var houses = document.getElementById("housesVisitedDaily").value; 
+      if(!vol || !houses){ alert("Please fill report details"); return; } 
+      appData.dailyReports.push({
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        volunteer: vol, 
+        housesVisited: houses, 
+        notes: document.getElementById("dailyNotes").value
+      }); 
+      saveData(); 
+      document.getElementById("housesVisitedDaily").value=""; 
+      document.getElementById("dailyNotes").value=""; 
+      alert(currentText.report); 
+    });
+  }
 
   // Export CSV
-  document.getElementById("exportVisitsBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var csv = "House No,Family,Mobile,Status,Volunteer\n"; 
-    for(var i=0; i<appData.visits.length; i++) {
-      var v = appData.visits[i];
-      csv+='"'+v.houseNo+'","'+v.familyName+'","'+v.mobile+'","'+v.status+'","'+v.volunteer+'"\n';
-    }
-    var a=document.createElement("a"); 
-    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); 
-    a.download="campaign_data.csv";  
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
+  var exportVisitsBtn = document.getElementById("exportVisitsBtn");
+  if (exportVisitsBtn) {
+    exportVisitsBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var csv = "House No,Family,Mobile,Status,Volunteer\n"; 
+      for(var i=0; i<appData.visits.length; i++) {
+        var v = appData.visits[i];
+        csv+='"'+v.houseNo+'","'+v.familyName+'","'+v.mobile+'","'+v.status+'","'+v.volunteer+'"\n';
+      }
+      var a=document.createElement("a"); 
+      a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); 
+      a.download="campaign_data.csv";  
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  }
 
   // ADMIN: Add Team Member
-  document.getElementById("adminAddVolunteerBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    adminAddTeamMember();
-  });
+  var adminAddVolunteerBtn = document.getElementById("adminAddVolunteerBtn");
+  if (adminAddVolunteerBtn) {
+    adminAddVolunteerBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      adminAddTeamMember();
+    });
+  }
 
   // ADMIN: Send Team Message
-  document.getElementById("adminSendTeamMsgBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    adminSendTeamWhatsApp();
-  });
+  var adminSendTeamMsgBtn = document.getElementById("adminSendTeamMsgBtn");
+  if (adminSendTeamMsgBtn) {
+    adminSendTeamMsgBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      adminSendTeamWhatsApp();
+    });
+  }
 
   // ADMIN: Message template change
-  document.getElementById("adminMsgTemplate").addEventListener("change", function() {
-    var val = this.value;
-    if (val === 'custom') {
-      document.getElementById("adminCustomMessage").value = '';
-      document.getElementById("adminCustomMessage").placeholder = 'Type your custom message here...';
-    } else {
-      document.getElementById("adminCustomMessage").value = getAdminMessageTemplate(val);
-    }
-  });
+  var adminMsgTemplate = document.getElementById("adminMsgTemplate");
+  if (adminMsgTemplate) {
+    adminMsgTemplate.addEventListener("change", function() {
+      var val = this.value;
+      var customMsg = document.getElementById("adminCustomMessage");
+      if (val === 'custom') {
+        if (customMsg) {
+          customMsg.value = '';
+          customMsg.placeholder = 'Type your custom message here...';
+        }
+      } else {
+        if (customMsg) {
+          customMsg.value = getAdminMessageTemplate(val);
+        }
+      }
+    });
+  }
 
   // Admin Login
-  document.getElementById("adminLoginBtn").addEventListener("click", loginAdmin);
-  document.getElementById("adminToggleBtn").addEventListener("click", toggleAdminLogin);
-  document.getElementById("adminLogoutBtn").addEventListener("click", logoutAdmin);
+  var adminLoginBtn = document.getElementById("adminLoginBtn");
+  if (adminLoginBtn) adminLoginBtn.addEventListener("click", loginAdmin);
+  var adminToggleBtn = document.getElementById("adminToggleBtn");
+  if (adminToggleBtn) adminToggleBtn.addEventListener("click", toggleAdminLogin);
+  var adminLogoutBtn = document.getElementById("adminLogoutBtn");
+  if (adminLogoutBtn) adminLogoutBtn.addEventListener("click", logoutAdmin);
 
   // Admin: Add Event
-  document.getElementById("addEventBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    var title = document.getElementById("eventTitle").value;
-    var date = document.getElementById("eventDate").value;
-    var desc = document.getElementById("eventDesc").value;
-    if (!title || !date) { alert("Please fill event title and date"); return; }
-    appData.events.push({
-      id: Date.now().toString(),
-      title: title,
-      date: date,
-      desc: desc
+  var addEventBtn = document.getElementById("addEventBtn");
+  if (addEventBtn) {
+    addEventBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      var title = document.getElementById("eventTitle").value;
+      var date = document.getElementById("eventDate").value;
+      var desc = document.getElementById("eventDesc").value;
+      if (!title || !date) { alert("Please fill event title and date"); return; }
+      appData.events.push({
+        id: Date.now().toString(),
+        title: title,
+        date: date,
+        desc: desc
+      });
+      saveData();
+      document.getElementById("eventTitle").value = "";
+      document.getElementById("eventDate").value = "";
+      document.getElementById("eventDesc").value = "";
+      alert("Event added successfully!");
     });
-    saveData();
-    document.getElementById("eventTitle").value = "";
-    document.getElementById("eventDate").value = "";
-    document.getElementById("eventDesc").value = "";
-    alert("Event added successfully!");
-  });
+  }
 
-  // Admin: Upload Gallery
-  document.getElementById("uploadGalleryBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    uploadGalleryImage();
-  });
+  // Admin: Upload Gallery Media
+  var uploadGalleryBtn = document.getElementById("uploadGalleryBtn");
+  if (uploadGalleryBtn) {
+    uploadGalleryBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      uploadGalleryMedia();
+    });
+  }
 
   // Language buttons
   var langBtns = document.querySelectorAll(".lang-btn");
@@ -1417,13 +1755,30 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Admin password enter key
-  document.getElementById("adminPass").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") loginAdmin();
-  });
+  var adminPass = document.getElementById("adminPass");
+  if (adminPass) {
+    adminPass.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") loginAdmin();
+    });
+  }
 
-  // Initialize
+  // Load data and sync from Supabase
   loadData();
   setLanguage("en");
+  
+  // Try to load from Supabase after local load
+  setTimeout(function() {
+    if (useSupabase && supabaseClient) {
+      loadFromSupabase();
+    }
+  }, 1000);
+
+  // Periodic sync every 30 seconds
+  if (useSupabase && supabaseClient) {
+    syncInterval = setInterval(function() {
+      syncToSupabase();
+    }, 30000);
+  }
 });
 
 // Expose functions globally
@@ -1432,7 +1787,7 @@ window.approveVolunteer = approveVolunteer;
 window.deleteVolunteer = deleteVolunteer;
 window.deleteApprovedVolunteer = deleteApprovedVolunteer;
 window.deleteEvent = deleteEvent;
-window.deleteGalleryImage = deleteGalleryImage;
+window.deleteGalleryItem = deleteGalleryItem;
 window.deleteIssue = deleteIssue;
 window.deleteAdminReport = deleteAdminReport;
 window.deleteVisit = deleteVisit;
@@ -1443,6 +1798,9 @@ window.logoutAdmin = logoutAdmin;
 window.toggleAdminLogin = toggleAdminLogin;
 window.adminSendTeamWhatsApp = adminSendTeamWhatsApp;
 window.adminAddTeamMember = adminAddTeamMember;
+window.openLightbox = openLightbox;
+window.closeLightbox = closeLightbox;
+window.deleteTeamMessage = deleteTeamMessage;
 </script>
 </body>
 </html>
