@@ -6,7 +6,6 @@
   <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -104,11 +103,13 @@
     .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
     .cloud-badge{background:#3b82f6;color:white;padding:1px 8px;border-radius:30px;font-size:8px;margin-left:4px;}
+    .sync-all-btn{background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:40px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+    .sync-all-btn:hover{background:#7c3aed;}
+    .cloud-saved{color:#10b981;font-size:11px;}
   </style>
 </head>
 <body>
 <div class="app-container">
-  <!-- Admin Login Overlay -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
       <h2 style="text-align:center;">🔐 Admin Login</h2>
@@ -136,7 +137,6 @@
     <div class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> <span id="syncText">Connecting...</span></div>
   </div>
 
-  <!-- PAGE 1: HOME -->
   <div id="page-home" class="page active">
     <div class="card" style="text-align:center">
       <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%22170%22%3E%3Crect width=%22130%22 height=%22170%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2265%22 y=%2290%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
@@ -162,7 +162,6 @@
     <div class="card"><h3>📅 Upcoming Events</h3><div id="publicEventsList"></div></div>
   </div>
 
-  <!-- PAGE 2: DOOR TO DOOR -->
   <div id="page-doortodoor" class="page">
     <div class="card"><h3 id="d2dTitle">🏠 House Visit Entry</h3>
       <div class="input-group"><input id="houseNo" placeholder="House Number / Name"></div>
@@ -183,7 +182,6 @@
     <button type="button" id="exportVisitsBtn" class="btn-outline" style="margin-top:8px;"><i class="fas fa-download"></i> <span id="exportText">Export CSV</span></button>
   </div>
 
-  <!-- PAGE 3: ISSUES -->
   <div id="page-issue" class="page">
     <div class="card"><h3 id="issueFormTitle">⚠️ Public Issue Registration</h3>
       <div class="input-group"><input id="issuePersonName" placeholder="Your Name"></div>
@@ -199,7 +197,6 @@
     </div>
   </div>
 
-  <!-- PAGE 4: VOLUNTEERS -->
   <div id="page-volunteer" class="page">
     <div class="card"><h3 id="volRegTitle">🤝 Volunteer Registration</h3>
       <div class="input-group"><input id="volNameReg" placeholder="Full Name"></div>
@@ -217,14 +214,12 @@
     <div id="dailyReportsList"></div>
   </div>
 
-  <!-- PAGE 5: GALLERY -->
   <div id="page-gallery" class="page">
     <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery <span class="cloud-badge">☁️ Cloud</span></h3>
       <div id="publicGalleryEvents"></div>
     </div>
   </div>
 
-  <!-- ADMIN PAGE -->
   <div id="page-admin" class="page admin-only">
     <div class="card">
       <h3>🔐 Admin Dashboard <span class="admin-badge">Admin</span></h3>
@@ -234,7 +229,15 @@
         <div class="admin-stat-card">🔄 <span id="adminFollowLabel">Follow-up</span><span id="adminFollowupCount">0</span></div>
         <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><span id="adminIssueCount">0</span></div>
       </div>
-      <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p></div>
+      <div style="margin-top:10px;">
+        <div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div>
+        <p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="sync-all-btn" onclick="forceSyncToSupabase()"><i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud</button>
+        <button class="sync-all-btn" style="background:#10b981;" onclick="loadAllFromSupabase()"><i class="fas fa-cloud-download-alt"></i> Load from Cloud</button>
+      </div>
+      <p style="font-size:11px;color:#64748b;margin-top:8px;"><i class="fas fa-info-circle"></i> All data is stored in cloud and visible on all devices</p>
     </div>
 
     <div class="card">
@@ -309,7 +312,6 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
     <div class="nav-item" data-page="page-doortodoor"><i class="fas fa-door-open"></i><span id="navD2D">Door to Door</span></div>
@@ -317,10 +319,9 @@
     <div class="nav-item" data-page="page-volunteer"><i class="fas fa-users"></i><span id="navVol">Volunteers</span></div>
     <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
   </div>
-  <div class="footer-text">📢 Campaign Team - Data Synced with Supabase Cloud</div>
+  <div class="footer-text">📢 Campaign Team - All Data Stored in Cloud ☁️</div>
 </div>
 
-<!-- Lightbox -->
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="close-btn" onclick="closeLightbox()">&times;</button>
   <img id="lightboxImg" src="" alt="" style="display:none;">
@@ -331,15 +332,15 @@
 
 <script>
 // ============================================================
-// SUPABASE CONFIG - YOUR CORRECT VALUES
+// SUPABASE CONFIG
 // ============================================================
 const SUPABASE_URL = "https://maftocroavouozowdhhs.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hZnRvY3JvYXZvdW96b3dkaGhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzI0NDMsImV4cCI6MjA5ODY0ODQ0M30.ie8XKTYuOi3YOh3E0bJ-aB2K7n0ipOqcRz4Os9ndqX4";
 
-// Initialize Supabase
 let supabaseClient = null;
 let useSupabase = false;
 let syncInterval;
+let isSyncing = false;
 
 try {
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -355,7 +356,7 @@ try {
 }
 
 // ============================================================
-// DATA
+// DATA - All data stored in cloud
 // ============================================================
 var appData = {
   visits: [],
@@ -1101,7 +1102,7 @@ function deleteEvent(id) {
   }
 }
 
-// ======================= GALLERY RENDERING - Updated for Cloud =======================
+// ======================= GALLERY RENDERING =======================
 function renderGallery() {
   var pubCont = document.getElementById("publicGalleryEvents");
   var adminImgCont = document.getElementById("adminGalleryGrid");
@@ -1152,7 +1153,6 @@ function renderGallery() {
     pubCont.innerHTML = html;
   }
 
-  // Admin Images
   var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
   if (adminImgCont && isAdmin) {
     if (images.length === 0) {
@@ -1167,7 +1167,6 @@ function renderGallery() {
     }
   }
 
-  // Admin Videos
   var videos = appData.gallery.filter(function(g) { return g.type === 'video'; });
   if (adminVidCont && isAdmin) {
     if (videos.length === 0) {
@@ -1235,7 +1234,6 @@ async function uploadGalleryMedia() {
     return; 
   }
   
-  // Check if Supabase is connected
   if (!useSupabase || !supabaseClient) {
     alert("⚠️ Supabase not connected! Please check your internet connection.");
     return;
@@ -1249,14 +1247,10 @@ async function uploadGalleryMedia() {
   uploadBtn.disabled = true;
   
   try {
-    // Generate unique filename
     const fileExt = file.name.split('.').pop() || 'jpg';
     const fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 10) + '.' + fileExt;
     const filePath = 'public/' + fileName;
     
-    console.log('📤 Uploading to Supabase Storage:', filePath);
-    
-    // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabaseClient
       .storage
       .from('gallery')
@@ -1266,22 +1260,16 @@ async function uploadGalleryMedia() {
       });
     
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       throw new Error(uploadError.message);
     }
     
-    console.log('✅ Upload successful:', uploadData);
-    
-    // Get public URL
     const { data: urlData } = supabaseClient
       .storage
       .from('gallery')
       .getPublicUrl(filePath);
     
     const publicUrl = urlData.publicUrl;
-    console.log('🔗 Public URL:', publicUrl);
     
-    // Save to appData with cloud URL
     appData.gallery.push({
       id: Date.now().toString(),
       type: type,
@@ -1291,10 +1279,8 @@ async function uploadGalleryMedia() {
       isCloud: true
     });
     
-    // Save to localStorage AND sync to Supabase
     saveData();
     
-    // Clear form
     document.getElementById("galleryMediaInput").value = "";
     document.getElementById("galleryCaption").value = "";
     
@@ -1308,8 +1294,142 @@ async function uploadGalleryMedia() {
     console.error('❌ Upload error:', error);
     uploadBtn.innerHTML = originalText;
     uploadBtn.disabled = false;
-    alert("❌ Upload failed: " + error.message + "\n\nPlease check:\n- Internet connection\n- Supabase storage bucket exists\n- Storage policies allow upload");
+    alert("❌ Upload failed: " + error.message);
   }
+}
+
+// ======================= FORCE SYNC ALL DATA TO SUPABASE =======================
+async function forceSyncToSupabase() {
+  if (!useSupabase || !supabaseClient) {
+    alert("⚠️ Supabase not connected!");
+    return;
+  }
+  
+  if (isSyncing) {
+    alert("⏳ Sync already in progress...");
+    return;
+  }
+  
+  isSyncing = true;
+  var btn = document.querySelector('.sync-all-btn');
+  var originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+  btn.disabled = true;
+  
+  try {
+    // Sync all data tables
+    await supabaseClient.from('visits').upsert(appData.visits, { onConflict: 'id' });
+    await supabaseClient.from('issues').upsert(appData.issues, { onConflict: 'id' });
+    await supabaseClient.from('volunteers').upsert(appData.volunteers, { onConflict: 'id' });
+    await supabaseClient.from('daily_reports').upsert(appData.dailyReports, { onConflict: 'id' });
+    await supabaseClient.from('events').upsert(appData.events, { onConflict: 'id' });
+    await supabaseClient.from('team_messages').upsert(appData.teamMessages, { onConflict: 'id' });
+    
+    // Also update a master record for timestamp
+    await supabaseClient.from('visits').upsert({
+      id: 'master_sync',
+      timestamp: Date.now(),
+      houseNo: 'SYNC',
+      familyName: 'SYNC',
+      mobile: 'SYNC',
+      status: 'SYNC',
+      volunteer: 'SYNC',
+      syncedAt: new Date().toISOString()
+    }, { onConflict: 'id' });
+    
+    document.getElementById('syncText').textContent = 'All Data Synced ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    
+    alert("✅ All data synced to cloud successfully!\n\n📊 " + 
+      "Visits: " + appData.visits.length + "\n" +
+      "Issues: " + appData.issues.length + "\n" +
+      "Volunteers: " + appData.volunteers.length + "\n" +
+      "Reports: " + appData.dailyReports.length + "\n" +
+      "Events: " + appData.events.length + "\n" +
+      "Gallery: " + appData.gallery.length + "\n" +
+      "Messages: " + appData.teamMessages.length);
+    
+  } catch (error) {
+    console.error('Sync error:', error);
+    alert("❌ Sync failed: " + error.message);
+  }
+  
+  isSyncing = false;
+  btn.innerHTML = originalText;
+  btn.disabled = false;
+}
+
+// ======================= LOAD ALL DATA FROM SUPABASE =======================
+async function loadAllFromSupabase() {
+  if (!useSupabase || !supabaseClient) {
+    alert("⚠️ Supabase not connected!");
+    return;
+  }
+  
+  if (isSyncing) {
+    alert("⏳ Sync in progress...");
+    return;
+  }
+  
+  isSyncing = true;
+  var btn = document.querySelector('.sync-all-btn');
+  var btns = document.querySelectorAll('.sync-all-btn');
+  var loadBtn = btns[1];
+  var originalText = loadBtn.innerHTML;
+  loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+  loadBtn.disabled = true;
+  
+  try {
+    // Load all data from Supabase
+    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, messagesRes] = await Promise.all([
+      supabaseClient.from('visits').select('*'),
+      supabaseClient.from('issues').select('*'),
+      supabaseClient.from('volunteers').select('*'),
+      supabaseClient.from('daily_reports').select('*'),
+      supabaseClient.from('events').select('*'),
+      supabaseClient.from('team_messages').select('*')
+    ]);
+    
+    // Remove sync master record
+    if (visitsRes.data) {
+      appData.visits = visitsRes.data.filter(v => v.houseNo !== 'SYNC' && v.familyName !== 'SYNC');
+    }
+    if (issuesRes.data) appData.issues = issuesRes.data;
+    if (volunteersRes.data) {
+      appData.volunteers = volunteersRes.data.map(v => ({ ...v, status: v.status || 'pending' }));
+    }
+    if (reportsRes.data) appData.dailyReports = reportsRes.data;
+    if (eventsRes.data) appData.events = eventsRes.data;
+    if (messagesRes.data) appData.teamMessages = messagesRes.data;
+    
+    if (!appData.gallery) appData.gallery = [];
+    
+    saveData();
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+    
+    document.getElementById('syncText').textContent = 'Cloud Loaded ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    
+    alert("✅ All data loaded from cloud!\n\n📊 " + 
+      "Visits: " + appData.visits.length + "\n" +
+      "Issues: " + appData.issues.length + "\n" +
+      "Volunteers: " + appData.volunteers.length + "\n" +
+      "Reports: " + appData.dailyReports.length + "\n" +
+      "Events: " + appData.events.length + "\n" +
+      "Gallery: " + appData.gallery.length + "\n" +
+      "Messages: " + appData.teamMessages.length);
+    
+  } catch (error) {
+    console.error('Load error:', error);
+    alert("❌ Load failed: " + error.message);
+  }
+  
+  isSyncing = false;
+  loadBtn.innerHTML = originalText;
+  loadBtn.disabled = false;
 }
 
 // ======================= UPDATE ADMIN STATS =======================
@@ -1438,82 +1558,49 @@ function saveData() {
   populateFilters();
   populateVolunteerDropdowns();
   
-  // Sync to Supabase if available
-  if (useSupabase && supabaseClient) {
-    syncToSupabase();
+  // Auto sync to Supabase
+  if (useSupabase && supabaseClient && !isSyncing) {
+    autoSyncToSupabase();
   }
 }
 
-// ======================= SUPABASE SYNC FUNCTIONS =======================
-async function syncToSupabase() {
+// ======================= AUTO SYNC TO SUPABASE =======================
+async function autoSyncToSupabase() {
   if (!useSupabase || !supabaseClient) return;
+  if (isSyncing) return;
   
   try {
-    // Sync all data to Supabase
-    const dataToSync = {
-      visits: appData.visits || [],
-      issues: appData.issues || [],
-      volunteers: appData.volunteers || [],
-      dailyReports: appData.dailyReports || [],
-      events: appData.events || [],
-      teamMessages: appData.teamMessages || [],
-      updatedAt: new Date().toISOString()
-    };
+    isSyncing = true;
+    // Sync all data tables (skip if empty to save quota)
+    if (appData.visits.length > 0) {
+      await supabaseClient.from('visits').upsert(appData.visits, { onConflict: 'id' });
+    }
+    if (appData.issues.length > 0) {
+      await supabaseClient.from('issues').upsert(appData.issues, { onConflict: 'id' });
+    }
+    if (appData.volunteers.length > 0) {
+      await supabaseClient.from('volunteers').upsert(appData.volunteers, { onConflict: 'id' });
+    }
+    if (appData.dailyReports.length > 0) {
+      await supabaseClient.from('daily_reports').upsert(appData.dailyReports, { onConflict: 'id' });
+    }
+    if (appData.events.length > 0) {
+      await supabaseClient.from('events').upsert(appData.events, { onConflict: 'id' });
+    }
+    if (appData.teamMessages.length > 0) {
+      await supabaseClient.from('team_messages').upsert(appData.teamMessages, { onConflict: 'id' });
+    }
     
-    // Save to each table individually
-    await supabaseClient.from('visits').upsert(dataToSync.visits, { onConflict: 'id' });
-    await supabaseClient.from('issues').upsert(dataToSync.issues, { onConflict: 'id' });
-    await supabaseClient.from('volunteers').upsert(dataToSync.volunteers, { onConflict: 'id' });
-    await supabaseClient.from('daily_reports').upsert(dataToSync.dailyReports, { onConflict: 'id' });
-    await supabaseClient.from('events').upsert(dataToSync.events, { onConflict: 'id' });
-    await supabaseClient.from('team_messages').upsert(dataToSync.teamMessages, { onConflict: 'id' });
-    
-    document.getElementById('syncText').textContent = 'Synced ✓';
+    document.getElementById('syncText').textContent = 'Auto Synced ✓';
     document.getElementById('syncStatus').className = 'sync-status supabase-connected';
     
   } catch(err) {
-    console.warn('Sync error:', err.message);
+    console.warn('Auto sync error:', err.message);
     document.getElementById('syncText').textContent = 'Sync pending';
     document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
   }
-}
-
-async function loadFromSupabase() {
-  if (!useSupabase || !supabaseClient) return;
   
-  try {
-    // Load all data from Supabase
-    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, messagesRes] = await Promise.all([
-      supabaseClient.from('visits').select('*'),
-      supabaseClient.from('issues').select('*'),
-      supabaseClient.from('volunteers').select('*'),
-      supabaseClient.from('daily_reports').select('*'),
-      supabaseClient.from('events').select('*'),
-      supabaseClient.from('team_messages').select('*')
-    ]);
-    
-    if (visitsRes.data) appData.visits = visitsRes.data;
-    if (issuesRes.data) appData.issues = issuesRes.data;
-    if (volunteersRes.data) {
-      appData.volunteers = volunteersRes.data.map(v => ({ ...v, status: v.status || 'pending' }));
-    }
-    if (reportsRes.data) appData.dailyReports = reportsRes.data;
-    if (eventsRes.data) appData.events = eventsRes.data;
-    if (messagesRes.data) appData.teamMessages = messagesRes.data;
-    
-    if (!appData.gallery) appData.gallery = [];
-    saveData();
-    renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
-    populateAdminTeamDropdown();
-    
-    document.getElementById('syncText').textContent = 'Cloud Loaded ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-    
-  } catch(err) {
-    console.warn('Load from Supabase error:', err.message);
-  }
+  isSyncing = false;
 }
 
 function applyConfig() {
@@ -1769,19 +1856,12 @@ document.addEventListener('DOMContentLoaded', function() {
   loadData();
   setLanguage("en");
   
-  // Try to load from Supabase after local load
+  // Auto load from Supabase after local load
   setTimeout(function() {
     if (useSupabase && supabaseClient) {
-      loadFromSupabase();
+      loadAllFromSupabase();
     }
-  }, 1000);
-
-  // Periodic sync every 30 seconds
-  if (useSupabase && supabaseClient) {
-    syncInterval = setInterval(function() {
-      syncToSupabase();
-    }, 30000);
-  }
+  }, 2000);
 });
 
 // Expose functions globally
@@ -1804,6 +1884,8 @@ window.adminAddTeamMember = adminAddTeamMember;
 window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.deleteTeamMessage = deleteTeamMessage;
+window.forceSyncToSupabase = forceSyncToSupabase;
+window.loadAllFromSupabase = loadAllFromSupabase;
 </script>
 </body>
 </html>
