@@ -107,6 +107,7 @@
     .sync-btn:hover{background:#7c3aed;}
     .success-msg{background:#d1fae5;color:#065f46;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
     .error-msg{background:#fee2e2;color:#991b1b;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
+    .cloud-saved{color:#10b981;font-size:10px;margin-left:4px;}
   </style>
 </head>
 <body>
@@ -232,8 +233,9 @@
       </div>
       <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p></div>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="sync-btn" onclick="syncAllToCloud()"><i class="fas fa-cloud-upload-alt"></i> Sync to Cloud</button>
-        <button class="sync-btn" style="background:#10b981;" onclick="loadFromCloud()"><i class="fas fa-cloud-download-alt"></i> Load from Cloud</button>
+        <button class="sync-btn" onclick="syncAllToCloud()"><i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud</button>
+        <button class="sync-btn" style="background:#10b981;" onclick="loadAllFromCloud()"><i class="fas fa-cloud-download-alt"></i> Load All from Cloud</button>
+        <button class="sync-btn" style="background:#f59e0b;" onclick="clearLocalData()"><i class="fas fa-trash"></i> Clear Local Data</button>
       </div>
       <p style="font-size:11px;color:#64748b;margin-top:8px;"><i class="fas fa-info-circle"></i> All data stored in cloud - visible on all devices</p>
     </div>
@@ -333,7 +335,7 @@ const SUPABASE_URL = "https://mitnarpkvezivdqjqmwh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdG5hcnBrdmV6aXZkcWpxbXdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzc4NzIsImV4cCI6MjA5ODY1Mzg3Mn0.qDU8vfq62OKDVpt8WBElYU4BA6esMnaTPgSGBRQgGDA";
 
 // ============================================================
-// DATA
+// DATA - All data will be stored in cloud
 // ============================================================
 var appData = {
   visits: [],
@@ -358,6 +360,7 @@ var currentText = {};
 var isAdmin = false;
 let supabaseClient = null;
 let useSupabase = false;
+let isSyncing = false;
 
 // Initialize Supabase
 try {
@@ -374,7 +377,7 @@ try {
 }
 
 // ============================================================
-// TRANSLATIONS
+// TRANSLATIONS (Simplified)
 // ============================================================
 var TE = {
   headerSub: "కార్పొరేటర్ ఎన్నికల ప్రచారం", call: "కాల్", wa: "WhatsApp", 
@@ -664,43 +667,101 @@ function getAdminMessageTemplate(type) {
 }
 
 // ============================================================
-// SYNC FUNCTIONS - CLOUD STORAGE
 // ============================================================
+// CLOUD SYNC FUNCTIONS - ALL DATA STORED IN CLOUD
+// ============================================================
+
+// SAVE DATA TO LOCAL (FALLBACK) + CLOUD
+function saveData() {
+  localStorage.setItem("electionAppV4", JSON.stringify(appData));
+  renderAll();
+  updateAdminUI();
+  populateFilters();
+  populateVolunteerDropdowns();
+  
+  // Auto sync to cloud
+  if (useSupabase && supabaseClient && !isSyncing) {
+    autoSyncToCloud();
+  }
+}
+
+// AUTO SYNC TO CLOUD
+async function autoSyncToCloud() {
+  if (!useSupabase || !supabaseClient || isSyncing) return;
+  
+  try {
+    isSyncing = true;
+    
+    // Sync all tables
+    const tables = [
+      { name: 'visits', data: appData.visits },
+      { name: 'issues', data: appData.issues },
+      { name: 'volunteers', data: appData.volunteers },
+      { name: 'daily_reports', data: appData.dailyReports },
+      { name: 'events', data: appData.events },
+      { name: 'gallery', data: appData.gallery },
+      { name: 'team_messages', data: appData.teamMessages }
+    ];
+    
+    for (const table of tables) {
+      if (table.data && table.data.length > 0) {
+        await supabaseClient.from(table.name).upsert(table.data, { onConflict: 'id' });
+      }
+    }
+    
+    document.getElementById('syncText').textContent = 'Auto Synced ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    
+  } catch(err) {
+    console.warn('Auto sync error:', err.message);
+    document.getElementById('syncText').textContent = 'Sync pending';
+    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  }
+  
+  isSyncing = false;
+}
+
+// MANUAL SYNC ALL TO CLOUD
 async function syncAllToCloud() {
   if (!useSupabase || !supabaseClient) {
     alert("⚠️ Supabase not connected! Check your keys.");
     return;
   }
   
+  if (isSyncing) {
+    alert("⏳ Sync already in progress...");
+    return;
+  }
+  
   var btn = document.querySelector('.sync-btn');
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
   btn.disabled = true;
+  isSyncing = true;
   
   try {
-    // Sync all tables
-    if (appData.visits.length > 0) {
-      await supabaseClient.from('visits').upsert(appData.visits, { onConflict: 'id' });
-    }
-    if (appData.issues.length > 0) {
-      await supabaseClient.from('issues').upsert(appData.issues, { onConflict: 'id' });
-    }
-    if (appData.volunteers.length > 0) {
-      await supabaseClient.from('volunteers').upsert(appData.volunteers, { onConflict: 'id' });
-    }
-    if (appData.dailyReports.length > 0) {
-      await supabaseClient.from('daily_reports').upsert(appData.dailyReports, { onConflict: 'id' });
-    }
-    if (appData.events.length > 0) {
-      await supabaseClient.from('events').upsert(appData.events, { onConflict: 'id' });
-    }
-    if (appData.teamMessages.length > 0) {
-      await supabaseClient.from('team_messages').upsert(appData.teamMessages, { onConflict: 'id' });
+    const tables = [
+      { name: 'visits', data: appData.visits },
+      { name: 'issues', data: appData.issues },
+      { name: 'volunteers', data: appData.volunteers },
+      { name: 'daily_reports', data: appData.dailyReports },
+      { name: 'events', data: appData.events },
+      { name: 'gallery', data: appData.gallery },
+      { name: 'team_messages', data: appData.teamMessages }
+    ];
+    
+    let totalSynced = 0;
+    for (const table of tables) {
+      if (table.data && table.data.length > 0) {
+        const { error } = await supabaseClient.from(table.name).upsert(table.data, { onConflict: 'id' });
+        if (!error) totalSynced += table.data.length;
+      }
     }
     
     document.getElementById('syncText').textContent = 'Synced ✓';
     document.getElementById('syncStatus').className = 'sync-status supabase-connected';
     
     alert("✅ All data synced to cloud!\n\n" +
+      "Total records synced: " + totalSynced + "\n" +
       "Visits: " + appData.visits.length + "\n" +
       "Issues: " + appData.issues.length + "\n" +
       "Volunteers: " + appData.volunteers.length + "\n" +
@@ -714,28 +775,37 @@ async function syncAllToCloud() {
     alert("❌ Sync failed: " + error.message);
   }
   
-  btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Sync to Cloud';
+  btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud';
   btn.disabled = false;
+  isSyncing = false;
 }
 
-async function loadFromCloud() {
+// LOAD ALL FROM CLOUD
+async function loadAllFromCloud() {
   if (!useSupabase || !supabaseClient) {
     alert("⚠️ Supabase not connected! Check your keys.");
+    return;
+  }
+  
+  if (isSyncing) {
+    alert("⏳ Sync in progress...");
     return;
   }
   
   var btn = document.querySelectorAll('.sync-btn')[1];
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
   btn.disabled = true;
+  isSyncing = true;
   
   try {
     // Load all tables
-    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, messagesRes] = await Promise.all([
+    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, galleryRes, messagesRes] = await Promise.all([
       supabaseClient.from('visits').select('*'),
       supabaseClient.from('issues').select('*'),
       supabaseClient.from('volunteers').select('*'),
       supabaseClient.from('daily_reports').select('*'),
       supabaseClient.from('events').select('*'),
+      supabaseClient.from('gallery').select('*'),
       supabaseClient.from('team_messages').select('*')
     ]);
     
@@ -746,6 +816,7 @@ async function loadFromCloud() {
     }
     if (reportsRes.data) appData.dailyReports = reportsRes.data;
     if (eventsRes.data) appData.events = eventsRes.data;
+    if (galleryRes.data) appData.gallery = galleryRes.data;
     if (messagesRes.data) appData.teamMessages = messagesRes.data;
     
     saveData();
@@ -771,19 +842,38 @@ async function loadFromCloud() {
     alert("❌ Load failed: " + error.message);
   }
   
-  btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Load from Cloud';
+  btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Load All from Cloud';
   btn.disabled = false;
+  isSyncing = false;
+}
+
+// CLEAR LOCAL DATA
+function clearLocalData() {
+  if (confirm("⚠️ This will clear all local data. Your cloud data will remain safe. Continue?")) {
+    localStorage.removeItem("electionAppV4");
+    appData.visits = [];
+    appData.issues = [];
+    appData.volunteers = [];
+    appData.dailyReports = [];
+    appData.events = [];
+    appData.gallery = [];
+    appData.teamMessages = [];
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+    alert("✅ Local data cleared! Click 'Load All from Cloud' to restore.");
+  }
 }
 
 // ============================================================
-// UPLOAD MEDIA - Supabase Storage
+// UPLOAD MEDIA - Supabase Storage + Database
 // ============================================================
 async function uploadGalleryMedia() {
   var fileInput = document.getElementById("galleryMediaInput");
   var caption = document.getElementById("galleryCaption").value;
   var file = fileInput.files[0];
   
-  // Clear previous messages
   document.getElementById('uploadStatus').style.display = 'none';
   document.getElementById('uploadError').style.display = 'none';
   
@@ -793,7 +883,7 @@ async function uploadGalleryMedia() {
   }
   
   if (!useSupabase || !supabaseClient) {
-    alert("⚠️ Supabase not connected! Please check your internet connection.");
+    alert("⚠️ Supabase not connected! Check your internet connection.");
     return;
   }
   
@@ -811,6 +901,7 @@ async function uploadGalleryMedia() {
     
     console.log('📤 Uploading to Supabase Storage:', filePath);
     
+    // Step 1: Upload to Storage
     const { data: uploadData, error: uploadError } = await supabaseClient
       .storage
       .from('gallery')
@@ -819,13 +910,11 @@ async function uploadGalleryMedia() {
         upsert: false
       });
     
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw new Error(uploadError.message);
-    }
+    if (uploadError) throw new Error(uploadError.message);
     
-    console.log('✅ Upload successful:', uploadData);
+    console.log('✅ Upload successful');
     
+    // Step 2: Get Public URL
     const { data: urlData } = supabaseClient
       .storage
       .from('gallery')
@@ -834,16 +923,20 @@ async function uploadGalleryMedia() {
     const publicUrl = urlData.publicUrl;
     console.log('🔗 Public URL:', publicUrl);
     
-    appData.gallery.push({
+    // Step 3: Save to appData
+    const galleryItem = {
       id: Date.now().toString(),
       type: type,
       data: publicUrl,
       caption: caption || "",
       uploadedAt: new Date().toISOString(),
       isCloud: true
-    });
+    };
     
-    saveData();
+    appData.gallery.push(galleryItem);
+    
+    // Step 4: Save to local and cloud
+    await saveDataAndSync();
     
     document.getElementById("galleryMediaInput").value = "";
     document.getElementById("galleryCaption").value = "";
@@ -851,7 +944,7 @@ async function uploadGalleryMedia() {
     uploadBtn.innerHTML = originalText;
     uploadBtn.disabled = false;
     
-    // Show success message
+    // Show success
     var statusEl = document.getElementById('uploadStatus');
     statusEl.innerHTML = '✅ Uploaded successfully! <a href="' + publicUrl + '" target="_blank">View file</a>';
     statusEl.style.display = 'block';
@@ -864,9 +957,8 @@ async function uploadGalleryMedia() {
     uploadBtn.innerHTML = originalText;
     uploadBtn.disabled = false;
     
-    // Show error message
     var errorEl = document.getElementById('uploadError');
-    errorEl.innerHTML = '❌ Upload failed: ' + error.message;
+    errorEl.innerHTML = '❌ ' + error.message;
     errorEl.style.display = 'block';
     
     if (error.message.includes('bucket')) {
@@ -875,6 +967,26 @@ async function uploadGalleryMedia() {
       alert("❌ Permission denied! Please add storage policy.");
     } else {
       alert("❌ Upload failed: " + error.message);
+    }
+  }
+}
+
+// Helper function to save and sync
+async function saveDataAndSync() {
+  localStorage.setItem("electionAppV4", JSON.stringify(appData));
+  renderAll();
+  updateAdminUI();
+  populateFilters();
+  populateVolunteerDropdowns();
+  
+  if (useSupabase && supabaseClient && !isSyncing) {
+    try {
+      isSyncing = true;
+      await supabaseClient.from('gallery').upsert(appData.gallery, { onConflict: 'id' });
+      isSyncing = false;
+    } catch(e) {
+      isSyncing = false;
+      console.warn('Sync warning:', e.message);
     }
   }
 }
@@ -893,6 +1005,9 @@ function renderAll() {
   renderEvents();
   renderGallery();
   renderAdminTeamMessageHistory();
+  renderVolunteers();
+  renderVisits();
+  renderDailyReports();
   updateAdminStats();
   updateAdminUI();
   populateAdminTeamDropdown();
@@ -1022,6 +1137,7 @@ function renderAdminFullReport() {
   html += '<div class="report-summary"><span>Total Reports:</span><strong>'+appData.dailyReports.length+'</strong></div>';
   html += '<div class="report-summary"><span>Issues:</span><strong>'+appData.issues.length+'</strong></div>';
   html += '<div class="report-summary"><span>Volunteers:</span><strong>'+appData.volunteers.filter(function(v) { return v.status === "approved"; }).length+'</strong></div>';
+  html += '<div class="report-summary"><span>Gallery Items:</span><strong>'+appData.gallery.length+'</strong></div>';
   html += '<div class="report-summary"><span>Team Messages:</span><strong>'+appData.teamMessages.length+'</strong></div>';
   html += '</div>';
   cont.innerHTML = html;
@@ -1209,6 +1325,43 @@ function populateVolunteerDropdowns() {
   }
 }
 
+function renderVisits() { 
+  var cont = document.getElementById("visitsList"); 
+  if(!cont) return;
+  if(appData.visits.length === 0) { cont.innerHTML = '<div class="card">'+currentText.noVisits+'</div>'; return; }
+  var html = '<h3>📋 Visit History</h3>';
+  for(var i=appData.visits.length-1; i>=0; i--) {
+    var v = appData.visits[i];
+    html += '<div class="card"><b>'+v.houseNo+'</b> - '+v.familyName+'<br>'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'<br>'+currentText.volunteer+': '+v.volunteer+'</div>';
+  }
+  cont.innerHTML = html;
+}
+
+function renderVolunteers() { 
+  var cont = document.getElementById("volunteersList"); 
+  if(!cont) return;
+  var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+  if(approved.length === 0) { cont.innerHTML = '<div class="card">'+currentText.noVols+'</div>'; return; }
+  var html = '<h3>🤝 '+currentText.volReg+'</h3>';
+  for(var i=approved.length-1; i>=0; i--) {
+    var v = approved[i];
+    html += '<div class="card"><b>'+v.name+'</b><br>📞 '+v.mobile+' | 📍 '+v.area+'</div>';
+  }
+  cont.innerHTML = html;
+}
+
+function renderDailyReports() { 
+  var cont = document.getElementById("dailyReportsList"); 
+  if(!cont) return;
+  if(appData.dailyReports.length === 0) { cont.innerHTML = '<div class="card">'+currentText.noReports+'</div>'; return; }
+  var html = '<h3>📋 '+currentText.daily+'</h3>';
+  for(var i=appData.dailyReports.length-1; i>=0; i--) {
+    var r = appData.dailyReports[i];
+    html += '<div class="card"><b>'+r.volunteer+'</b> 🏠 '+r.housesVisited+' '+currentText.housesVisited+'<br>📝 '+(r.notes||'')+'</div>';
+  }
+  cont.innerHTML = html;
+}
+
 function updateAdminStats() {
   var total = 5000;
   var covered = appData.visits.filter(function(v) { return v.status === "Visited"; }).length;
@@ -1241,14 +1394,6 @@ function loadData() {
   }
   applyConfig();
   renderAll();
-  populateFilters();
-  populateVolunteerDropdowns();
-}
-
-function saveData() {
-  localStorage.setItem("electionAppV4", JSON.stringify(appData));
-  renderAll();
-  updateAdminUI();
   populateFilters();
   populateVolunteerDropdowns();
 }
@@ -1512,6 +1657,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load data
   loadData();
   setLanguage("en");
+  
+  // Auto load from cloud after 2 seconds
+  setTimeout(function() {
+    if (useSupabase && supabaseClient) {
+      loadAllFromCloud();
+    }
+  }, 2000);
 });
 
 // Expose functions globally
@@ -1527,7 +1679,8 @@ window.toggleAdminLogin = toggleAdminLogin;
 window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.syncAllToCloud = syncAllToCloud;
-window.loadFromCloud = loadFromCloud;
+window.loadAllFromCloud = loadAllFromCloud;
+window.clearLocalData = clearLocalData;
 </script>
 </body>
 </html>
