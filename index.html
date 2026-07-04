@@ -80,8 +80,10 @@
     .admin-only{display:none;}
     .admin-only.active{display:block;}
     .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
-    .login-box{background:white;border-radius:28px;padding:32px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+    .login-box{background:white;border-radius:28px;padding:32px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;}
     .login-box h2{text-align:center;color:var(--dark);}
+    .login-close-btn{position:absolute;top:12px;right:16px;background:transparent;border:none;font-size:28px;color:#94a3b8;cursor:pointer;transition:color 0.2s;padding:4px 8px;border-radius:8px;line-height:1;}
+    .login-close-btn:hover{color:#ef4444;background:#f1f5f9;}
     .issue-detail{font-size:13px;color:#475569;margin:4px 0;}
     .issue-detail i{width:20px;color:var(--primary);}
     .report-summary{display:flex;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-radius:8px;margin:4px 0;}
@@ -111,16 +113,17 @@
     .badge-premium{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2px 12px;border-radius:30px;font-size:9px;}
     .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
-    /* PWA install banner style */
     .install-banner{background:#0f2b3d;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:10px;}
     .install-banner button{background:#e85d3a;border:none;color:white;padding:6px 16px;border-radius:30px;font-weight:600;cursor:pointer;}
   </style>
 </head>
 <body>
 <div class="app-container">
-  <!-- Login Overlay - no default credentials shown -->
+  <!-- Login Overlay with Close Button -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
+      <!-- Close Button (X) -->
+      <button type="button" id="loginCloseBtn" class="login-close-btn" title="Close"><i class="fas fa-times"></i></button>
       <h2 style="text-align:center;">🔐 Admin Login</h2>
       <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">Enter admin credentials</p>
       <div class="input-group"><input type="text" id="adminUser" placeholder="Username"></div>
@@ -173,7 +176,6 @@
         <li style="padding:6px 0;">✅ Women Safety - CCTV Cameras</li>
       </ul>
     </div>
-    <!-- Upcoming Events removed as requested -->
   </div>
 
   <!-- PAGE 2: DOOR TO DOOR -->
@@ -302,8 +304,6 @@
       <div id="adminFilteredReports"></div>
     </div>
     <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
-    
-    <!-- Manage Events removed from admin as well to keep gallery only -->
     
     <div class="card">
       <h3>🖼️ Manage Gallery <span class="badge-premium">Images & Videos</span></h3>
@@ -650,6 +650,13 @@ function toggleAdminLogin() {
     document.getElementById("adminUser").value = "";
     document.getElementById("adminPass").value = "";
   }
+}
+
+function closeLoginPopup() {
+  document.getElementById("loginOverlay").classList.add("hidden");
+  // Clear fields
+  document.getElementById("adminUser").value = "";
+  document.getElementById("adminPass").value = "";
 }
 
 function updateAdminUI() {
@@ -1104,7 +1111,6 @@ function renderAdminTeamMessageHistory() {
   cont.innerHTML = html;
 }
 
-// Events rendering removed from public view - only gallery shows images/videos
 function renderGallery() {
   var pubCont = document.getElementById("publicGalleryEvents");
   var adminImgCont = document.getElementById("adminGalleryGrid");
@@ -1112,7 +1118,6 @@ function renderGallery() {
 
   if (pubCont) {
     var html = '';
-    // Only show images and videos, no events
     var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
     html += '<h4 style="margin-top:0;">🖼️ Photos</h4>';
     if (images.length === 0) {
@@ -1545,6 +1550,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Close Login Popup with X button
+  var loginCloseBtn = document.getElementById("loginCloseBtn");
+  if (loginCloseBtn) {
+    loginCloseBtn.addEventListener("click", function() {
+      closeLoginPopup();
+    });
+  }
+
+  // Close Login Popup by clicking outside (on overlay)
+  var loginOverlay = document.getElementById("loginOverlay");
+  if (loginOverlay) {
+    loginOverlay.addEventListener("click", function(e) {
+      if (e.target === this) {
+        closeLoginPopup();
+      }
+    });
+  }
+
   // Save Visit
   var saveVisitBtn = document.getElementById("saveVisitBtn");
   if (saveVisitBtn) {
@@ -1788,6 +1811,7 @@ window.setLanguage = setLanguage;
 window.loginAdmin = loginAdmin;
 window.logoutAdmin = logoutAdmin;
 window.toggleAdminLogin = toggleAdminLogin;
+window.closeLoginPopup = closeLoginPopup;
 window.adminSendTeamWhatsApp = adminSendTeamWhatsApp;
 window.adminAddTeamMember = adminAddTeamMember;
 window.openLightbox = openLightbox;
