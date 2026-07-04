@@ -23,10 +23,10 @@
     .app-container{max-width:500px;margin:0 auto;background:white;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.05);position:relative;padding-bottom:70px;}
     .app-header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;padding:14px 16px 12px;text-align:center;position:relative;overflow:hidden;}
     .app-header::before{content:'';position:absolute;top:-50%;right:-20%;width:200px;height:200px;background:rgba(255,255,255,0.03);border-radius:50%;}
-    .app-header h1{font-size:18px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-weight:700;letter-spacing:-0.3px;}
-    .app-header h1 span{font-weight:300;opacity:0.7;font-size:11px;}
-    .developer-badge{font-size:10px;background:var(--glass);padding:4px 14px;border-radius:30px;margin-top:4px;display:inline-block;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08);}
-    .developer-badge i{font-size:10px;margin-right:4px;}
+    .app-header h1{font-size:24px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-weight:800;letter-spacing:-0.3px;}
+    .app-header h1 span{font-weight:300;opacity:0.7;font-size:14px;}
+    .developer-badge{font-size:13px;background:var(--glass);padding:5px 18px;border-radius:30px;margin-top:5px;display:inline-block;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08);font-weight:500;}
+    .developer-badge i{font-size:12px;margin-right:5px;}
     .lang-buttons{display:flex;justify-content:center;gap:10px;margin-top:8px;}
     .lang-btn{background:var(--glass);border:none;padding:5px 18px;border-radius:30px;color:white;font-weight:500;cursor:pointer;font-size:12px;transition:all 0.2s;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.06);}
     .lang-btn.active{background:var(--accent);border-color:var(--accent);}
@@ -115,6 +115,11 @@
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
     .install-banner{background:#0f2b3d;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:10px;}
     .install-banner button{background:#e85d3a;border:none;color:white;padding:6px 16px;border-radius:30px;font-weight:600;cursor:pointer;}
+    /* Larger Header Elements */
+    .header-sub-text{font-size:16px;opacity:0.9;margin-top:4px;font-weight:500;}
+    .header-admin-status{font-size:13px;background:var(--glass);padding:5px 18px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);display:inline-block;}
+    .header-admin-btn{font-size:13px;padding:5px 18px;}
+    .header-dev-badge{font-size:14px;background:var(--glass);padding:6px 20px;border-radius:30px;margin-top:5px;display:inline-block;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08);font-weight:500;}
   </style>
 </head>
 <body>
@@ -133,13 +138,13 @@
   </div>
 
   <div class="app-header">
-    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:11px;font-weight:400;">SVR Innovation</span></h1>
-    <div class="developer-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
-    <p style="font-size:11px;opacity:0.85;margin-top:4px;" id="headerSub">Corporator Election Campaign</p>
-    <div style="display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap;">
-      <span id="adminStatus" style="font-size:10px;background:var(--glass);padding:3px 14px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);">👤 Public</span>
-      <button type="button" id="adminToggleBtn" class="lang-btn" style="font-size:10px;padding:3px 14px;">🔑 Admin</button>
-      <button type="button" id="adminLogoutBtn" class="lang-btn hidden" style="font-size:10px;padding:3px 14px;background:#ef4444;border-color:#ef4444;">🚪 Logout</button>
+    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:16px;font-weight:400;">Developed by SVR Innovation</span></h1>
+    <div class="header-dev-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
+    <p class="header-sub-text" id="headerSub">Corporator Election Campaign</p>
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+      <span id="adminStatus" class="header-admin-status">👤 Public</span>
+      <button type="button" id="adminToggleBtn" class="lang-btn header-admin-btn" style="font-size:13px;padding:5px 18px;">🔑 Admin</button>
+      <button type="button" id="adminLogoutBtn" class="lang-btn hidden header-admin-btn" style="font-size:13px;padding:5px 18px;background:#ef4444;border-color:#ef4444;">🚪 Logout</button>
     </div>
     <div class="lang-buttons">
       <button type="button" class="lang-btn" data-lang="te">తెలుగు</button>
