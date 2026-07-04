@@ -1,0 +1,21 @@
+{
+  "name": "Election Pilot - Vijay Anna Campaign",
+  "short_name": "Vijay Anna",
+  "description": "Corporator Election Campaign Management",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f2b3d",
+  "theme_color": "#0f2b3d",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
