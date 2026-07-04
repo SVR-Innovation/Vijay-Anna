@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title>ELECTION PILOT | Mana Anna Campaign</title>
+  <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--primary:#0f2b3d;--primary-light:#1a4a6a;--accent:#e85d3a;--accent-light:#f07a5a;--success:#10b981;--warning:#f59e0b;--gray:#f1f5f9;--dark:#0a1a2a;--glass:rgba(255,255,255,0.12);}
@@ -102,16 +104,11 @@
     .badge-premium{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2px 12px;border-radius:30px;font-size:9px;}
     .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
-    .cloud-badge{background:#3b82f6;color:white;padding:1px 8px;border-radius:30px;font-size:8px;margin-left:4px;}
-    .sync-btn{background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:40px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-    .sync-btn:hover{background:#7c3aed;}
-    .success-msg{background:#d1fae5;color:#065f46;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
-    .error-msg{background:#fee2e2;color:#991b1b;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
-    .cloud-saved{color:#10b981;font-size:10px;margin-left:4px;}
   </style>
 </head>
 <body>
 <div class="app-container">
+  <!-- Admin Login Overlay -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
       <h2 style="text-align:center;">🔐 Admin Login</h2>
@@ -136,12 +133,13 @@
       <button type="button" class="lang-btn" data-lang="te">తెలుగు</button>
       <button type="button" class="lang-btn active" data-lang="en">English</button>
     </div>
-    <div class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> <span id="syncText">Connecting...</span></div>
+    <div class="sync-status" id="syncStatus"><i class="fas fa-cloud"></i> <span id="syncText">Firestore Connected</span></div>
   </div>
 
+  <!-- PAGE 1: HOME -->
   <div id="page-home" class="page active">
     <div class="card" style="text-align:center">
-      <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%22170%22%3E%3Crect width=%22130%22 height=%22170%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2265%22 y=%2290%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
+      <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%22170%22%3E%3Crect width=%22130%22 height=%22170%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2265%22 y=%2290%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
       <h2 id="candidateName" style="font-size:20px;">Mana Vijay Anna</h2>
       <p id="slogan" class="text-accent" style="font-size:14px;">"My Promise - Your Trust | Development First"</p>
       <div style="display:flex;gap:10px;margin:14px 0;">
@@ -164,6 +162,7 @@
     <div class="card"><h3>📅 Upcoming Events</h3><div id="publicEventsList"></div></div>
   </div>
 
+  <!-- PAGE 2: DOOR TO DOOR -->
   <div id="page-doortodoor" class="page">
     <div class="card"><h3 id="d2dTitle">🏠 House Visit Entry</h3>
       <div class="input-group"><input id="houseNo" placeholder="House Number / Name"></div>
@@ -184,6 +183,7 @@
     <button type="button" id="exportVisitsBtn" class="btn-outline" style="margin-top:8px;"><i class="fas fa-download"></i> <span id="exportText">Export CSV</span></button>
   </div>
 
+  <!-- PAGE 3: ISSUES -->
   <div id="page-issue" class="page">
     <div class="card"><h3 id="issueFormTitle">⚠️ Public Issue Registration</h3>
       <div class="input-group"><input id="issuePersonName" placeholder="Your Name"></div>
@@ -199,6 +199,7 @@
     </div>
   </div>
 
+  <!-- PAGE 4: VOLUNTEERS -->
   <div id="page-volunteer" class="page">
     <div class="card"><h3 id="volRegTitle">🤝 Volunteer Registration</h3>
       <div class="input-group"><input id="volNameReg" placeholder="Full Name"></div>
@@ -216,12 +217,14 @@
     <div id="dailyReportsList"></div>
   </div>
 
+  <!-- PAGE 5: GALLERY -->
   <div id="page-gallery" class="page">
-    <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery <span class="cloud-badge">☁️ Cloud</span></h3>
+    <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery</h3>
       <div id="publicGalleryEvents"></div>
     </div>
   </div>
 
+  <!-- ADMIN PAGE -->
   <div id="page-admin" class="page admin-only">
     <div class="card">
       <h3>🔐 Admin Dashboard <span class="admin-badge">Admin</span></h3>
@@ -232,12 +235,6 @@
         <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><span id="adminIssueCount">0</span></div>
       </div>
       <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p></div>
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="sync-btn" onclick="syncAllToCloud()"><i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud</button>
-        <button class="sync-btn" style="background:#10b981;" onclick="loadAllFromCloud()"><i class="fas fa-cloud-download-alt"></i> Load All from Cloud</button>
-        <button class="sync-btn" style="background:#f59e0b;" onclick="clearLocalData()"><i class="fas fa-trash"></i> Clear Local Data</button>
-      </div>
-      <p style="font-size:11px;color:#64748b;margin-top:8px;"><i class="fas fa-info-circle"></i> All data stored in cloud - visible on all devices</p>
     </div>
 
     <div class="card">
@@ -250,6 +247,7 @@
 
     <div class="card">
       <h3>📨 Send Message to Team <span class="admin-badge">Admin</span></h3>
+      <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Send WhatsApp message to individual team members or broadcast to all</p>
       <div class="input-group">
         <select id="adminTeamMemberSelect">
           <option value="all">📢 Send to ALL Team Members</option>
@@ -258,34 +256,38 @@
       <div class="input-group">
         <select id="adminMsgTemplate">
           <option value="default">📝 Default Message</option>
-          <option value="meeting">📅 Team Meeting</option>
+          <option value="meeting">📅 Team Meeting Invitation</option>
           <option value="task">📋 Task Assignment</option>
           <option value="update">🔄 Campaign Update</option>
           <option value="custom">✏️ Custom Message</option>
         </select>
       </div>
       <div class="input-group">
-        <textarea id="adminCustomMessage" rows="4">🙏 Hello Team! Great work on the campaign. Keep up the spirit! Jai Hind! 🇮🇳</textarea>
+        <textarea id="adminCustomMessage" rows="4" placeholder="Type your message here...">🙏 Hello Team! Great work on the campaign. Let's continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳</textarea>
       </div>
       <button type="button" id="adminSendTeamMsgBtn" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> <span id="adminSendMsgText">Send WhatsApp Message</span></button>
       <div id="adminSendStatus" style="margin-top:8px;font-size:13px;"></div>
     </div>
 
-    <div class="card"><h3>📨 Team Message History</h3><div id="adminTeamMsgHistory"></div></div>
-    <div class="card"><h3>🏠 All House Visits</h3><div id="adminAllVisits"></div></div>
-    <div class="card"><h3>📋 All Daily Reports</h3><div id="adminAllReports"></div></div>
-    <div class="card"><h3>⚠️ All Issues</h3><div id="adminIssuesList"></div></div>
-    <div class="card"><h3>📋 Pending Volunteers</h3><div id="pendingVolunteersList"></div></div>
-    <div class="card"><h3>✅ Approved Volunteers</h3><div id="approvedVolunteersList"></div></div>
     <div class="card">
-      <h3>📊 Volunteer Reports</h3>
+      <h3>📨 Team Message History <span class="admin-badge">Admin</span></h3>
+      <div id="adminTeamMsgHistory"></div>
+    </div>
+
+    <div class="card"><h3>🏠 All House Visits <span class="admin-badge">Admin</span></h3><div id="adminAllVisits"></div></div>
+    <div class="card"><h3>📋 All Daily Reports <span class="admin-badge">Admin</span></h3><div id="adminAllReports"></div></div>
+    <div class="card"><h3>⚠️ All Reported Issues <span class="admin-badge">Admin</span></h3><div id="adminIssuesList"></div></div>
+    <div class="card"><h3>📋 Volunteer Approvals <span class="admin-badge">Admin</span></h3><div id="pendingVolunteersList"></div></div>
+    <div class="card"><h3>✅ Approved Volunteers <span class="admin-badge">Admin</span></h3><div id="approvedVolunteersList"></div></div>
+    <div class="card">
+      <h3>📊 Volunteer Reports <span class="admin-badge">Admin</span></h3>
       <div class="search-box">
         <select id="adminReportFilter"><option value="all">All Volunteers</option></select>
         <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
       </div>
       <div id="adminFilteredReports"></div>
     </div>
-    <div class="card"><h3>📊 Complete Reports</h3><div id="adminFullReports"></div></div>
+    <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
     
     <div class="card">
       <h3>📅 Manage Events</h3>
@@ -297,18 +299,16 @@
     </div>
     
     <div class="card">
-      <h3>🖼️ Manage Gallery <span class="badge-premium">☁️ Cloud Storage</span></h3>
-      <p style="font-size:12px;color:#64748b;margin-bottom:10px;">Upload images/videos - visible on ALL devices</p>
-      <div id="uploadStatus" class="success-msg"></div>
-      <div id="uploadError" class="error-msg"></div>
+      <h3>🖼️ Manage Gallery <span class="badge-premium">Images & Videos</span></h3>
       <div class="input-group"><input type="file" id="galleryMediaInput" accept="image/*,video/*"></div>
-      <div class="input-group"><input id="galleryCaption" placeholder="Caption (optional)"></div>
-      <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-cloud-upload-alt"></i> <span>Upload to Cloud</span></button>
+      <div class="input-group"><input id="galleryCaption" placeholder="Caption"></div>
+      <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-upload"></i> <span>Upload Media</span></button>
       <div id="adminGalleryGrid" class="gallery-grid" style="margin-top:10px;"></div>
       <div id="adminVideoGrid" class="video-grid" style="margin-top:10px;"></div>
     </div>
   </div>
 
+  <!-- Bottom Navigation -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
     <div class="nav-item" data-page="page-doortodoor"><i class="fas fa-door-open"></i><span id="navD2D">Door to Door</span></div>
@@ -316,9 +316,10 @@
     <div class="nav-item" data-page="page-volunteer"><i class="fas fa-users"></i><span id="navVol">Volunteers</span></div>
     <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
   </div>
-  <div class="footer-text">📢 Campaign Team - All Data Stored in Cloud ☁️</div>
+  <div class="footer-text">📢 Campaign Team - Data Synced with Firebase Firestore</div>
 </div>
 
+<!-- Lightbox -->
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
   <button class="close-btn" onclick="closeLightbox()">&times;</button>
   <img id="lightboxImg" src="" alt="" style="display:none;">
@@ -329,13 +330,45 @@
 
 <script>
 // ============================================================
-// SUPABASE CONFIG - YOUR CORRECT KEYS
+// FIREBASE CONFIG - REPLACE WITH YOUR KEYS
 // ============================================================
-const SUPABASE_URL = "https://mitnarpkvezivdqjqmwh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdG5hcnBrdmV6aXZkcWpxbXdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzc4NzIsImV4cCI6MjA5ODY1Mzg3Mn0.qDU8vfq62OKDVpt8WBElYU4BA6esMnaTPgSGBRQgGDA";
+const firebaseConfig = {
+  apiKey: "AIzaSyBdDpH4Z6oV7kjsVPPUDTdDyxN1PD_UtNI",
+  authDomain: "vijay-anna-1b348.firebaseapp.com",
+  projectId: "vijay-anna-1b348",
+  storageBucket: "vijay-anna-1b348.firebasestorage.app",
+  messagingSenderId: "119361649084",
+  appId: "1:119361649084:web:82425ce694be9d281913b9",
+  measurementId: "G-5K4LLY73MP"
+};
+
+// Initialize Firebase
+let db = null;
+let useFirebase = false;
+
+try {
+  if (firebaseConfig.apiKey.includes("YOUR_API_KEY")) {
+    console.warn('⚠️ Please replace Firebase config with your actual keys!');
+    useFirebase = false;
+    document.getElementById('syncText').textContent = 'Setup Required';
+    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  } else {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    useFirebase = true;
+    console.log('✅ Firebase connected');
+    document.getElementById('syncText').textContent = 'Firestore Connected';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+  }
+} catch(e) {
+  console.warn('⚠️ Firebase not available:', e.message);
+  document.getElementById('syncText').textContent = 'Local Mode (Offline)';
+  document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  useFirebase = false;
+}
 
 // ============================================================
-// DATA - All data will be stored in cloud
+// DATA
 // ============================================================
 var appData = {
   visits: [],
@@ -358,27 +391,8 @@ var appData = {
 var currentLang = "en";
 var currentText = {};
 var isAdmin = false;
-let supabaseClient = null;
-let useSupabase = false;
-let isSyncing = false;
 
-// Initialize Supabase
-try {
-  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  useSupabase = true;
-  console.log('✅ Supabase connected');
-  document.getElementById('syncText').textContent = 'Cloud Connected';
-  document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-} catch(e) {
-  console.warn('⚠️ Supabase not available:', e.message);
-  document.getElementById('syncText').textContent = 'Local Mode (Offline)';
-  document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
-  useSupabase = false;
-}
-
-// ============================================================
-// TRANSLATIONS (Simplified)
-// ============================================================
+// TRANSLATIONS
 var TE = {
   headerSub: "కార్పొరేటర్ ఎన్నికల ప్రచారం", call: "కాల్", wa: "WhatsApp", 
   vol: "వాలంటీర్ చేరండి", issue: "సమస్య నమోదు",
@@ -443,9 +457,7 @@ var EN = {
   addTeamMember: "Add Team Member", allMembers: "Send to ALL Members"
 };
 
-// ============================================================
-// LANGUAGE FUNCTION
-// ============================================================
+// ======================= LANGUAGE =======================
 function setLanguage(lang) {
   currentLang = lang;
   currentText = lang === "te" ? TE : EN;
@@ -562,24 +574,28 @@ function setLanguage(lang) {
   populateAdminTeamDropdown();
 }
 
-// ============================================================
-// ADMIN FUNCTIONS
-// ============================================================
+// ======================= ADMIN =======================
 function loginAdmin() {
   var user = document.getElementById("adminUser").value;
   var pass = document.getElementById("adminPass").value;
   if (user === "admin" && pass === "admin123") {
     isAdmin = true;
-    document.getElementById("loginOverlay").classList.add("hidden");
-    document.getElementById("adminStatus").innerText = "🔑 " + currentText.admin;
-    document.getElementById("adminToggleBtn").classList.add("hidden");
-    document.getElementById("adminLogoutBtn").classList.remove("hidden");
+    var overlay = document.getElementById("loginOverlay");
+    if (overlay) overlay.classList.add("hidden");
+    var adminStatus = document.getElementById("adminStatus");
+    if (adminStatus) adminStatus.innerText = "🔑 " + currentText.admin;
+    var toggleBtn = document.getElementById("adminToggleBtn");
+    if (toggleBtn) toggleBtn.classList.add("hidden");
+    var logoutBtn = document.getElementById("adminLogoutBtn");
+    if (logoutBtn) logoutBtn.classList.remove("hidden");
     var adminPages = document.querySelectorAll(".admin-only");
     for(var i=0; i<adminPages.length; i++) adminPages[i].classList.add("active");
-    document.getElementById("bottomNav").classList.add("admin-mode");
+    var bottomNav = document.getElementById("bottomNav");
+    if (bottomNav) bottomNav.classList.add("admin-mode");
     var allPages = document.querySelectorAll(".page:not(.admin-only)");
     for(var j=0; j<allPages.length; j++) allPages[j].classList.remove("active");
-    document.getElementById("page-admin").classList.add("active");
+    var adminPage = document.getElementById("page-admin");
+    if (adminPage) adminPage.classList.add("active");
     renderAll();
     updateAdminUI();
     populateFilters();
@@ -592,18 +608,24 @@ function loginAdmin() {
 
 function logoutAdmin() {
   isAdmin = false;
-  document.getElementById("adminStatus").innerText = "👤 " + currentText.public;
-  document.getElementById("adminToggleBtn").classList.remove("hidden");
-  document.getElementById("adminLogoutBtn").classList.add("hidden");
+  var adminStatus = document.getElementById("adminStatus");
+  if (adminStatus) adminStatus.innerText = "👤 " + currentText.public;
+  var toggleBtn = document.getElementById("adminToggleBtn");
+  if (toggleBtn) toggleBtn.classList.remove("hidden");
+  var logoutBtn = document.getElementById("adminLogoutBtn");
+  if (logoutBtn) logoutBtn.classList.add("hidden");
   var adminPages = document.querySelectorAll(".admin-only");
   for(var i=0; i<adminPages.length; i++) adminPages[i].classList.remove("active");
-  document.getElementById("bottomNav").classList.remove("admin-mode");
+  var bottomNav = document.getElementById("bottomNav");
+  if (bottomNav) bottomNav.classList.remove("admin-mode");
   var allPages = document.querySelectorAll(".page");
   for(var j=0; j<allPages.length; j++) allPages[j].classList.remove("active");
-  document.getElementById("page-home").classList.add("active");
+  var homePage = document.getElementById("page-home");
+  if (homePage) homePage.classList.add("active");
   var navs = document.querySelectorAll(".nav-item");
   for(var k=0; k<navs.length; k++) navs[k].classList.remove("active");
-  document.querySelector('.nav-item[data-page="page-home"]').classList.add("active");
+  var homeNav = document.querySelector('.nav-item[data-page="page-home"]');
+  if (homeNav) homeNav.classList.add("active");
   renderAll();
   populateFilters();
   populateVolunteerDropdowns();
@@ -613,17 +635,17 @@ function toggleAdminLogin() {
   if (isAdmin) {
     logoutAdmin();
   } else {
-    document.getElementById("loginOverlay").classList.remove("hidden");
+    var overlay = document.getElementById("loginOverlay");
+    if (overlay) overlay.classList.remove("hidden");
   }
 }
 
 function updateAdminUI() {
-  document.getElementById("adminIssueCount").innerText = appData.issues.length;
+  var issueCount = document.getElementById("adminIssueCount");
+  if (issueCount) issueCount.innerText = appData.issues.length;
 }
 
-// ============================================================
-// FILTERS
-// ============================================================
+// ======================= FILTERS =======================
 function populateFilters() {
   var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
   var filterEl = document.getElementById("adminReportFilter");
@@ -639,6 +661,7 @@ function populateFilters() {
   }
 }
 
+// ======================= ADMIN TEAM DROPDOWN =======================
 function populateAdminTeamDropdown() {
   var sel = document.getElementById("adminTeamMemberSelect");
   if (!sel) return;
@@ -655,365 +678,178 @@ function populateAdminTeamDropdown() {
   }
 }
 
+// ======================= ADMIN MESSAGE TEMPLATES =======================
 function getAdminMessageTemplate(type) {
   var templates = {
-    'default': '🙏 Hello Team! Great work on the campaign. Keep up the spirit! Jai Hind! 🇮🇳',
-    'meeting': '📅 Team meeting tomorrow at 10 AM. Please attend! Jai Hind! 🇮🇳',
-    'task': '📋 Task: Complete 50 house visits today. Report back by evening. 🙏',
-    'update': '🔄 We covered 60% of target. Keep pushing! Vijay Anna is counting on us! 🇮🇳',
+    'default': '🙏 Hello Team! Great work on the campaign. Let\'s continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳',
+    'meeting': '📅 Dear Team Member, We have an important team meeting tomorrow at 10 AM. Please attend. We will discuss campaign strategy and progress. Jai Hind! 🇮🇳',
+    'task': '📋 Task Assignment: Please complete door-to-door survey in your assigned area today. Collect feedback from 50 houses. Report back by evening. Thank you! 🙏',
+    'update': '🔄 Campaign Update: We have covered 60% of our target. Keep pushing! Remember our promise of development, clean water, and good roads. Vijay Anna is counting on us! 🇮🇳',
     'custom': ''
   };
   return templates[type] || templates['default'];
 }
 
-// ============================================================
-// ============================================================
-// CLOUD SYNC FUNCTIONS - ALL DATA STORED IN CLOUD
-// ============================================================
-
-// SAVE DATA TO LOCAL (FALLBACK) + CLOUD
-function saveData() {
-  localStorage.setItem("electionAppV4", JSON.stringify(appData));
-  renderAll();
-  updateAdminUI();
-  populateFilters();
-  populateVolunteerDropdowns();
+// ======================= ADMIN SEND TEAM WHATSAPP =======================
+function adminSendTeamWhatsApp() {
+  var sel = document.getElementById("adminTeamMemberSelect");
+  var selectedValue = sel ? sel.value : 'all';
   
-  // Auto sync to cloud
-  if (useSupabase && supabaseClient && !isSyncing) {
-    autoSyncToCloud();
+  var message = document.getElementById("adminCustomMessage").value;
+  if (!message || message.trim() === '') {
+    alert("Please enter a message to send.");
+    return;
   }
-}
-
-// AUTO SYNC TO CLOUD
-async function autoSyncToCloud() {
-  if (!useSupabase || !supabaseClient || isSyncing) return;
   
-  try {
-    isSyncing = true;
+  var statusDiv = document.getElementById("adminSendStatus");
+  
+  if (selectedValue === 'all') {
+    var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+    if (approved.length === 0) {
+      alert("No approved team members to send messages to!");
+      return;
+    }
     
-    // Sync all tables
-    const tables = [
-      { name: 'visits', data: appData.visits },
-      { name: 'issues', data: appData.issues },
-      { name: 'volunteers', data: appData.volunteers },
-      { name: 'daily_reports', data: appData.dailyReports },
-      { name: 'events', data: appData.events },
-      { name: 'gallery', data: appData.gallery },
-      { name: 'team_messages', data: appData.teamMessages }
-    ];
+    var sentCount = 0;
     
-    for (const table of tables) {
-      if (table.data && table.data.length > 0) {
-        await supabaseClient.from(table.name).upsert(table.data, { onConflict: 'id' });
+    for(var i=0; i<approved.length; i++) {
+      var member = approved[i];
+      var mobile = member.mobile;
+      if (!mobile || mobile.trim() === '') continue;
+      
+      var phone = mobile.replace(/[^0-9]/g, '');
+      if (phone.length < 10) continue;
+      if (phone.length === 10) phone = '91' + phone;
+      
+      appData.teamMessages.push({
+        id: Date.now().toString() + '_' + i,
+        timestamp: new Date().toLocaleString(),
+        memberName: member.name,
+        memberMobile: mobile,
+        message: message,
+        sentBy: 'Admin (Bulk)',
+        isBulk: true
+      });
+      
+      sentCount++;
+      
+      if (i === 0) {
+        var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+        window.open(url, '_blank');
       }
     }
-    
-    document.getElementById('syncText').textContent = 'Auto Synced ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-    
-  } catch(err) {
-    console.warn('Auto sync error:', err.message);
-    document.getElementById('syncText').textContent = 'Sync pending';
-    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
-  }
-  
-  isSyncing = false;
-}
-
-// MANUAL SYNC ALL TO CLOUD
-async function syncAllToCloud() {
-  if (!useSupabase || !supabaseClient) {
-    alert("⚠️ Supabase not connected! Check your keys.");
-    return;
-  }
-  
-  if (isSyncing) {
-    alert("⏳ Sync already in progress...");
-    return;
-  }
-  
-  var btn = document.querySelector('.sync-btn');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
-  btn.disabled = true;
-  isSyncing = true;
-  
-  try {
-    const tables = [
-      { name: 'visits', data: appData.visits },
-      { name: 'issues', data: appData.issues },
-      { name: 'volunteers', data: appData.volunteers },
-      { name: 'daily_reports', data: appData.dailyReports },
-      { name: 'events', data: appData.events },
-      { name: 'gallery', data: appData.gallery },
-      { name: 'team_messages', data: appData.teamMessages }
-    ];
-    
-    let totalSynced = 0;
-    for (const table of tables) {
-      if (table.data && table.data.length > 0) {
-        const { error } = await supabaseClient.from(table.name).upsert(table.data, { onConflict: 'id' });
-        if (!error) totalSynced += table.data.length;
-      }
-    }
-    
-    document.getElementById('syncText').textContent = 'Synced ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-    
-    alert("✅ All data synced to cloud!\n\n" +
-      "Total records synced: " + totalSynced + "\n" +
-      "Visits: " + appData.visits.length + "\n" +
-      "Issues: " + appData.issues.length + "\n" +
-      "Volunteers: " + appData.volunteers.length + "\n" +
-      "Reports: " + appData.dailyReports.length + "\n" +
-      "Events: " + appData.events.length + "\n" +
-      "Gallery: " + appData.gallery.length + "\n" +
-      "Messages: " + appData.teamMessages.length);
-    
-  } catch(error) {
-    console.error('Sync error:', error);
-    alert("❌ Sync failed: " + error.message);
-  }
-  
-  btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Sync All to Cloud';
-  btn.disabled = false;
-  isSyncing = false;
-}
-
-// LOAD ALL FROM CLOUD
-async function loadAllFromCloud() {
-  if (!useSupabase || !supabaseClient) {
-    alert("⚠️ Supabase not connected! Check your keys.");
-    return;
-  }
-  
-  if (isSyncing) {
-    alert("⏳ Sync in progress...");
-    return;
-  }
-  
-  var btn = document.querySelectorAll('.sync-btn')[1];
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-  btn.disabled = true;
-  isSyncing = true;
-  
-  try {
-    // Load all tables
-    const [visitsRes, issuesRes, volunteersRes, reportsRes, eventsRes, galleryRes, messagesRes] = await Promise.all([
-      supabaseClient.from('visits').select('*'),
-      supabaseClient.from('issues').select('*'),
-      supabaseClient.from('volunteers').select('*'),
-      supabaseClient.from('daily_reports').select('*'),
-      supabaseClient.from('events').select('*'),
-      supabaseClient.from('gallery').select('*'),
-      supabaseClient.from('team_messages').select('*')
-    ]);
-    
-    if (visitsRes.data) appData.visits = visitsRes.data;
-    if (issuesRes.data) appData.issues = issuesRes.data;
-    if (volunteersRes.data) {
-      appData.volunteers = volunteersRes.data.map(v => ({ ...v, status: v.status || 'pending' }));
-    }
-    if (reportsRes.data) appData.dailyReports = reportsRes.data;
-    if (eventsRes.data) appData.events = eventsRes.data;
-    if (galleryRes.data) appData.gallery = galleryRes.data;
-    if (messagesRes.data) appData.teamMessages = messagesRes.data;
     
     saveData();
+    if (statusDiv) {
+      statusDiv.innerHTML = '✅ Sent to ' + sentCount + ' team members';
+      statusDiv.style.color = '#16a34a';
+    }
+    alert('📤 ' + currentText.msgSent + '\n\nSent to ' + sentCount + ' team members.');
+    
     renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
     populateAdminTeamDropdown();
-    
-    document.getElementById('syncText').textContent = 'Loaded ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-    
-    alert("✅ All data loaded from cloud!\n\n" +
-      "Visits: " + appData.visits.length + "\n" +
-      "Issues: " + appData.issues.length + "\n" +
-      "Volunteers: " + appData.volunteers.length + "\n" +
-      "Reports: " + appData.dailyReports.length + "\n" +
-      "Events: " + appData.events.length + "\n" +
-      "Gallery: " + appData.gallery.length + "\n" +
-      "Messages: " + appData.teamMessages.length);
-    
-  } catch(error) {
-    console.error('Load error:', error);
-    alert("❌ Load failed: " + error.message);
-  }
-  
-  btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Load All from Cloud';
-  btn.disabled = false;
-  isSyncing = false;
-}
-
-// CLEAR LOCAL DATA
-function clearLocalData() {
-  if (confirm("⚠️ This will clear all local data. Your cloud data will remain safe. Continue?")) {
-    localStorage.removeItem("electionAppV4");
-    appData.visits = [];
-    appData.issues = [];
-    appData.volunteers = [];
-    appData.dailyReports = [];
-    appData.events = [];
-    appData.gallery = [];
-    appData.teamMessages = [];
-    renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
-    populateAdminTeamDropdown();
-    alert("✅ Local data cleared! Click 'Load All from Cloud' to restore.");
-  }
-}
-
-// ============================================================
-// UPLOAD MEDIA - Supabase Storage + Database
-// ============================================================
-async function uploadGalleryMedia() {
-  var fileInput = document.getElementById("galleryMediaInput");
-  var caption = document.getElementById("galleryCaption").value;
-  var file = fileInput.files[0];
-  
-  document.getElementById('uploadStatus').style.display = 'none';
-  document.getElementById('uploadError').style.display = 'none';
-  
-  if (!file) { 
-    alert("📁 Please select an image or video file"); 
-    return; 
-  }
-  
-  if (!useSupabase || !supabaseClient) {
-    alert("⚠️ Supabase not connected! Check your internet connection.");
     return;
   }
   
-  var type = file.type.startsWith('video') ? 'video' : 'image';
-  var uploadBtn = document.getElementById('uploadGalleryBtn');
-  var originalText = uploadBtn.innerHTML;
+  var memberId = selectedValue;
+  if (!memberId) {
+    alert("Please select a team member!");
+    return;
+  }
   
-  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-  uploadBtn.disabled = true;
-  
-  try {
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 10) + '.' + fileExt;
-    const filePath = fileName;
-    
-    console.log('📤 Uploading to Supabase Storage:', filePath);
-    
-    // Step 1: Upload to Storage
-    const { data: uploadData, error: uploadError } = await supabaseClient
-      .storage
-      .from('gallery')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (uploadError) throw new Error(uploadError.message);
-    
-    console.log('✅ Upload successful');
-    
-    // Step 2: Get Public URL
-    const { data: urlData } = supabaseClient
-      .storage
-      .from('gallery')
-      .getPublicUrl(filePath);
-    
-    const publicUrl = urlData.publicUrl;
-    console.log('🔗 Public URL:', publicUrl);
-    
-    // Step 3: Save to appData
-    const galleryItem = {
-      id: Date.now().toString(),
-      type: type,
-      data: publicUrl,
-      caption: caption || "",
-      uploadedAt: new Date().toISOString(),
-      isCloud: true
-    };
-    
-    appData.gallery.push(galleryItem);
-    
-    // Step 4: Save to local and cloud
-    await saveDataAndSync();
-    
-    document.getElementById("galleryMediaInput").value = "";
-    document.getElementById("galleryCaption").value = "";
-    
-    uploadBtn.innerHTML = originalText;
-    uploadBtn.disabled = false;
-    
-    // Show success
-    var statusEl = document.getElementById('uploadStatus');
-    statusEl.innerHTML = '✅ Uploaded successfully! <a href="' + publicUrl + '" target="_blank">View file</a>';
-    statusEl.style.display = 'block';
-    
-    renderAll();
-    alert("✅ Uploaded to cloud!\n\n📱 Now visible on ALL devices!");
-    
-  } catch (error) {
-    console.error('❌ Upload error:', error);
-    uploadBtn.innerHTML = originalText;
-    uploadBtn.disabled = false;
-    
-    var errorEl = document.getElementById('uploadError');
-    errorEl.innerHTML = '❌ ' + error.message;
-    errorEl.style.display = 'block';
-    
-    if (error.message.includes('bucket')) {
-      alert("❌ Storage bucket 'gallery' not found!\n\nPlease create it in Supabase.");
-    } else if (error.message.includes('permission')) {
-      alert("❌ Permission denied! Please add storage policy.");
-    } else {
-      alert("❌ Upload failed: " + error.message);
+  var member = null;
+  for(var i=0; i<appData.volunteers.length; i++) {
+    if (appData.volunteers[i].id === memberId) {
+      member = appData.volunteers[i];
+      break;
     }
   }
+  
+  if (!member) {
+    alert("Team member not found!");
+    return;
+  }
+  
+  var mobile = member.mobile;
+  if (!mobile || mobile.trim() === '') {
+    alert("This team member doesn't have a mobile number.");
+    return;
+  }
+  
+  var phone = mobile.replace(/[^0-9]/g, '');
+  if (phone.length < 10) {
+    alert("Invalid mobile number.");
+    return;
+  }
+  if (phone.length === 10) phone = '91' + phone;
+  
+  appData.teamMessages.push({
+    id: Date.now().toString(),
+    timestamp: new Date().toLocaleString(),
+    memberName: member.name,
+    memberMobile: mobile,
+    message: message,
+    sentBy: 'Admin (Individual)',
+    isBulk: false
+  });
+  saveData();
+  
+  var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+  window.open(url, '_blank');
+  
+  if (statusDiv) {
+    statusDiv.innerHTML = '✅ ' + currentText.msgSent + ' to ' + member.name;
+    statusDiv.style.color = '#16a34a';
+  }
+  
+  renderAll();
+  populateAdminTeamDropdown();
 }
 
-// Helper function to save and sync
-async function saveDataAndSync() {
-  localStorage.setItem("electionAppV4", JSON.stringify(appData));
+// ======================= ADMIN ADD TEAM MEMBER =======================
+function adminAddTeamMember() {
+  var name = document.getElementById("adminVolName").value;
+  var mobile = document.getElementById("adminVolMobile").value;
+  var area = document.getElementById("adminVolArea").value;
+  
+  if (!name || !mobile) {
+    alert("Please fill Name and Mobile number!");
+    return;
+  }
+  
+  var exists = false;
+  for(var i=0; i<appData.volunteers.length; i++) {
+    if (appData.volunteers[i].mobile === mobile) {
+      exists = true;
+      break;
+    }
+  }
+  if (exists) {
+    alert("This mobile number is already registered!");
+    return;
+  }
+  
+  appData.volunteers.push({
+    id: Date.now().toString(),
+    name: name,
+    mobile: mobile,
+    area: area || '',
+    status: "approved"
+  });
+  
+  saveData();
+  document.getElementById("adminVolName").value = "";
+  document.getElementById("adminVolMobile").value = "";
+  document.getElementById("adminVolArea").value = "";
+  
+  alert("✅ Team member " + name + " added successfully!");
   renderAll();
-  updateAdminUI();
   populateFilters();
   populateVolunteerDropdowns();
-  
-  if (useSupabase && supabaseClient && !isSyncing) {
-    try {
-      isSyncing = true;
-      await supabaseClient.from('gallery').upsert(appData.gallery, { onConflict: 'id' });
-      isSyncing = false;
-    } catch(e) {
-      isSyncing = false;
-      console.warn('Sync warning:', e.message);
-    }
-  }
-}
-
-// ============================================================
-// RENDER FUNCTIONS
-// ============================================================
-function renderAll() {
-  renderAdminAllVisits();
-  renderAdminAllReports();
-  renderAdminIssues();
-  renderPendingVolunteers();
-  renderApprovedVolunteers();
-  renderAdminFilteredReports();
-  renderAdminFullReport();
-  renderEvents();
-  renderGallery();
-  renderAdminTeamMessageHistory();
-  renderVolunteers();
-  renderVisits();
-  renderDailyReports();
-  updateAdminStats();
-  updateAdminUI();
   populateAdminTeamDropdown();
-  populateVolunteerDropdowns();
 }
 
+// ======================= RENDER FUNCTIONS =======================
 function renderAdminAllVisits() {
   var cont = document.getElementById("adminAllVisits");
   if (!cont) return;
@@ -1024,9 +860,20 @@ function renderAdminAllVisits() {
   var html = '';
   for(var i=appData.visits.length-1; i>=0; i--) {
     var v = appData.visits[i];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">Status: '+v.status+'</span><br><span style="font-size:12px;color:#64748b;">Volunteer: '+v.volunteer+'</span></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'</span><br><span style="font-size:12px;color:#64748b;">'+currentText.volunteer+': '+v.volunteer+'</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\''+(v.id || v.timestamp || i)+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
+}
+
+function deleteVisit(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.visits = appData.visits.filter(function(v, index) {
+      var vid = v.id || v.timestamp || index;
+      return vid != id;
+    });
+    saveData();
+    renderAll();
+  }
 }
 
 function renderAdminAllReports() {
@@ -1039,9 +886,20 @@ function renderAdminAllReports() {
   var html = '';
   for(var i=appData.dailyReports.length-1; i>=0; i--) {
     var r = appData.dailyReports[i];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div><strong>'+r.volunteer+'</strong> 🏠 '+r.housesVisited+' houses<br><span style="font-size:12px;color:#64748b;">'+(r.notes || '')+'</span></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || i)+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
+}
+
+function deleteAdminReport(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.dailyReports = appData.dailyReports.filter(function(r, index) {
+      var rid = r.id || r.timestamp || index;
+      return rid != id;
+    });
+    saveData();
+    renderAll();
+  }
 }
 
 function renderAdminIssues() {
@@ -1054,9 +912,21 @@ function renderAdminIssues() {
   var html = '';
   for(var i=appData.issues.length-1; i>=0; i--) {
     var issue = appData.issues[i];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;border-left:4px solid var(--accent);"><div><strong>'+issue.category+'</strong><br><span style="font-size:12px;color:#64748b;">By: '+issue.name+' | Area: '+issue.area+'</span><br><span style="font-size:12px;">'+issue.desc+'</span></div></div>';
+    var id = issue.id || i;
+    html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#'+(i+1)+' - '+issue.category+'</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\''+id+'\')">🗑️ '+currentText.delete+'</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>'+currentText.name+':</strong> '+issue.name+'</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>'+currentText.mobile+':</strong> '+(issue.mobile || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>'+currentText.area+':</strong> '+(issue.area || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>'+currentText.category+':</strong> '+issue.category+'</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>'+currentText.description+':</strong> '+issue.desc+'</div></div>';
   }
   cont.innerHTML = html;
+}
+
+function deleteIssue(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.issues = appData.issues.filter(function(issue, index) {
+      var issueId = issue.id || index;
+      return issueId != id;
+    });
+    saveData();
+    renderAll();
+  }
 }
 
 function renderPendingVolunteers() {
@@ -1070,7 +940,7 @@ function renderPendingVolunteers() {
   var html = '';
   for(var i=0; i<pending.length; i++) {
     var v = pending[i];
-    html += '<div class="card" style="padding:10px;"><div><strong>'+v.name+'</strong><br><span style="font-size:12px;color:#64748b;">📞 '+v.mobile+' | 📍 '+v.area+'</span></div><button class="btn btn-success btn-sm" onclick="approveVolunteer(\''+v.id+'\')">✅ Approve</button></div>';
+    html += '<div class="card" style="padding:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.name+'</strong><br><span style="font-size:13px;color:#64748b;">📞 '+v.mobile+' | 📍 '+v.area+'</span></div><span class="pending-badge">'+currentText.pending+'</span></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-success btn-sm" onclick="approveVolunteer(\''+v.id+'\')">✅ '+currentText.approve+'</button><button class="btn btn-danger btn-sm" onclick="deleteVolunteer(\''+v.id+'\')">🗑️ '+currentText.delete+'</button></div></div>';
   }
   cont.innerHTML = html;
 }
@@ -1086,7 +956,7 @@ function renderApprovedVolunteers() {
   var html = '';
   for(var i=0; i<approved.length; i++) {
     var v = approved[i];
-    html += '<div class="card" style="padding:10px;"><div><strong>'+v.name+'</strong><br><span style="font-size:12px;color:#64748b;">📞 '+v.mobile+' | 📍 '+v.area+'</span></div></div>';
+    html += '<div class="card" style="padding:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.name+'</strong><br><span style="font-size:13px;color:#64748b;">📞 '+v.mobile+' | 📍 '+v.area+'</span></div><span class="approved-badge">'+currentText.approved+'</span></div><div style="margin-top:6px;"><button class="btn btn-danger btn-sm" onclick="deleteApprovedVolunteer(\''+v.id+'\')">🗑️ '+currentText.delete+'</button></div></div>';
   }
   cont.innerHTML = html;
 }
@@ -1105,6 +975,28 @@ function approveVolunteer(id) {
   populateAdminTeamDropdown();
 }
 
+function deleteVolunteer(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
+    saveData();
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+  }
+}
+
+function deleteApprovedVolunteer(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
+    saveData();
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+  }
+}
+
 function renderAdminFilteredReports() {
   var cont = document.getElementById("adminFilteredReports");
   if (!cont) return;
@@ -1118,28 +1010,44 @@ function renderAdminFilteredReports() {
     cont.innerHTML = '<div class="card">'+currentText.noReports+'</div>';
     return;
   }
-  var html = '';
+  var totalHouses = 0;
+  for(var i=0; i<reports.length; i++) totalHouses += parseInt(reports[i].housesVisited) || 0;
+  var html = '<div style="background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px;"><strong>'+currentText.totalVisits+': '+totalHouses+'</strong> | '+currentText.totalReports+': '+reports.length+'</div>';
   for(var j=reports.length-1; j>=0; j--) {
     var r = reports[j];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div><strong>'+r.volunteer+'</strong> 🏠 '+r.housesVisited+' houses</div></div>';
+    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || j)+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
 }
 
-function filterAdminReports() { renderAdminFilteredReports(); }
+function filterAdminReports() {
+  renderAdminFilteredReports();
+}
 
 function renderAdminFullReport() {
   var cont = document.getElementById("adminFullReports");
   if (!cont) return;
   var html = '<div style="background:#f8fafc;border-radius:12px;padding:12px;">';
-  html += '<h4>📊 Full Report</h4>';
-  html += '<div class="report-summary"><span>Total Visits:</span><strong>'+appData.visits.length+'</strong></div>';
-  html += '<div class="report-summary"><span>Total Reports:</span><strong>'+appData.dailyReports.length+'</strong></div>';
-  html += '<div class="report-summary"><span>Issues:</span><strong>'+appData.issues.length+'</strong></div>';
-  html += '<div class="report-summary"><span>Volunteers:</span><strong>'+appData.volunteers.filter(function(v) { return v.status === "approved"; }).length+'</strong></div>';
-  html += '<div class="report-summary"><span>Gallery Items:</span><strong>'+appData.gallery.length+'</strong></div>';
-  html += '<div class="report-summary"><span>Team Messages:</span><strong>'+appData.teamMessages.length+'</strong></div>';
+  html += '<h4 style="margin-bottom:8px;">📊 '+currentText.fullReport+'</h4>';
+  html += '<div class="report-summary"><span>'+currentText.totalVisits+':</span><strong>'+appData.visits.length+'</strong></div>';
+  html += '<div class="report-summary"><span>'+currentText.totalReports+':</span><strong>'+appData.dailyReports.length+'</strong></div>';
+  html += '<div class="report-summary"><span>'+currentText.issuesLabel+':</span><strong>'+appData.issues.length+'</strong></div>';
+  html += '<div class="report-summary"><span>'+currentText.volReg+':</span><strong>'+appData.volunteers.filter(function(v) { return v.status === "approved"; }).length+'</strong></div>';
+  html += '<div class="report-summary"><span>📨 Team Messages:</span><strong>'+appData.teamMessages.length+'</strong></div>';
   html += '</div>';
+  if (appData.dailyReports.length > 0) {
+    var volReports = {};
+    for(var i=0; i<appData.dailyReports.length; i++) {
+      var r = appData.dailyReports[i];
+      if (!volReports[r.volunteer]) volReports[r.volunteer] = { count: 0, houses: 0 };
+      volReports[r.volunteer].count++;
+      volReports[r.volunteer].houses += parseInt(r.housesVisited) || 0;
+    }
+    html += '<div style="margin-top:12px;"><strong>📊 '+currentText.reportBy+'</strong></div>';
+    for(var key in volReports) {
+      html += '<div class="report-summary"><span>'+key+'</span><span>🏠 '+volReports[key].houses+' ('+volReports[key].count+' '+currentText.totalReports+')</span></div>';
+    }
+  }
   cont.innerHTML = html;
 }
 
@@ -1153,9 +1061,20 @@ function renderAdminTeamMessageHistory() {
   var html = '';
   for(var i=appData.teamMessages.length-1; i>=0; i--) {
     var m = appData.teamMessages[i];
-    html += '<div class="team-msg-box"><div><strong>👤 '+m.memberName+'</strong> <span style="font-size:11px;color:#64748b;">'+m.timestamp+'</span></div><div style="font-size:13px;">'+m.message+'</div></div>';
+    var isBulk = m.isBulk ? ' <span class="badge-all">📢 BULK</span>' : '';
+    html += '<div class="team-msg-box" id="msg-'+m.id+'"><div><strong>👤 '+m.memberName+'</strong> <span style="font-size:11px;color:#64748b;">'+m.timestamp+'</span>'+isBulk;
+    html += '<button class="del-msg" onclick="deleteTeamMessage(\''+m.id+'\')">🗑️</button>';
+    html += '</div><div style="font-size:13px;margin-top:4px;">'+m.message+'</div><div class="sent">✅ Sent by: '+m.sentBy+' | 📱 '+m.memberMobile+'</div></div>';
   }
   cont.innerHTML = html;
+}
+
+function deleteTeamMessage(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.teamMessages = appData.teamMessages.filter(function(m) { return m.id !== id; });
+    saveData();
+    renderAll();
+  }
 }
 
 function renderEvents() {
@@ -1180,7 +1099,7 @@ function renderEvents() {
       var html = '';
       for(var i=appData.events.length-1; i>=0; i--) {
         var e = appData.events[i];
-        html += '<div class="event-card" style="display:flex;justify-content:space-between;align-items:center;"><div><b>'+e.title+'</b> 📅 '+e.date+'</div><button class="btn btn-danger btn-sm" onclick="deleteEvent(\''+e.id+'\')">🗑️</button></div>';
+        html += '<div class="event-card" style="display:flex;justify-content:space-between;align-items:center;"><div><b>'+e.title+'</b> 📅 '+e.date+'</div><button class="btn btn-danger btn-sm" onclick="deleteEvent(\''+e.id+'\')">🗑️ '+currentText.delete+'</button></div>';
       }
       adminCont.innerHTML = html;
     }
@@ -1195,6 +1114,7 @@ function deleteEvent(id) {
   }
 }
 
+// GALLERY RENDERING
 function renderGallery() {
   var pubCont = document.getElementById("publicGalleryEvents");
   var adminImgCont = document.getElementById("adminGalleryGrid");
@@ -1202,48 +1122,44 @@ function renderGallery() {
 
   if (pubCont) {
     var html = '';
-    // Events
-    html += '<h4>📅 Events</h4>';
+    html += '<h4 style="margin-top:0;">📅 Events</h4>';
     if (appData.events.length === 0) {
       html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
     } else {
       for(var i=appData.events.length-1; i>=0; i--) {
         var e = appData.events[i];
-        html += '<div class="event-card"><b>'+e.title+'</b><br>📅 '+e.date+'</div>';
+        html += '<div class="event-card"><b>'+e.title+'</b><br>📅 '+e.date+'<br><span style="font-size:13px;color:#64748b;">'+(e.desc || '')+'</span></div>';
       }
     }
     
-    // Images
     var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
-    html += '<h4 style="margin-top:14px;">🖼️ Photos <span class="cloud-badge">☁️ '+images.length+'</span></h4>';
+    html += '<h4 style="margin-top:14px;">🖼️ Photos</h4>';
     if (images.length === 0) {
       html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-image"></i>No photos</div>';
     } else {
       html += '<div class="gallery-grid">';
       for(var i=0; i<images.length; i++) {
         var g = images[i];
-        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'" onclick="openLightbox(\''+g.data+'\',\'image\')" loading="lazy"></div>';
+        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'" onclick="openLightbox(\''+g.data+'\',\'image\')"></div>';
       }
       html += '</div>';
     }
     
-    // Videos
     var videos = appData.gallery.filter(function(g) { return g.type === 'video'; });
-    html += '<h4 style="margin-top:14px;">🎬 Videos <span class="cloud-badge">☁️ '+videos.length+'</span></h4>';
+    html += '<h4 style="margin-top:14px;">🎬 Videos</h4>';
     if (videos.length === 0) {
       html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-video"></i>No videos</div>';
     } else {
       html += '<div class="video-grid">';
       for(var i=0; i<videos.length; i++) {
         var g = videos[i];
-        html += '<div><video src="'+g.data+'" controls preload="metadata"></video></div>';
+        html += '<div><video src="'+g.data+'" controls onclick="event.stopPropagation();"></video><div style="font-size:10px;color:#64748b;text-align:center;padding:2px;">'+ (g.caption || '') +'</div></div>';
       }
       html += '</div>';
     }
     pubCont.innerHTML = html;
   }
 
-  // Admin Images
   var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
   if (adminImgCont && isAdmin) {
     if (images.length === 0) {
@@ -1252,7 +1168,7 @@ function renderGallery() {
       var html = '';
       for(var i=0; i<images.length; i++) {
         var g = images[i];
-        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'" loading="lazy"><button class="delete-btn" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button></div>';
+        html += '<div class="gallery-item"><img src="'+g.data+'" alt="'+ (g.caption || '') +'"><button class="delete-btn" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button></div>';
       }
       adminImgCont.innerHTML = html;
     }
@@ -1266,7 +1182,7 @@ function renderGallery() {
       var html = '';
       for(var i=0; i<videos.length; i++) {
         var g = videos[i];
-        html += '<div style="position:relative;"><video src="'+g.data+'" controls></video><button class="delete-btn" style="position:absolute;top:4px;right:4px;" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button></div>';
+        html += '<div style="position:relative;"><video src="'+g.data+'" controls></video><button class="delete-btn" style="position:absolute;top:4px;right:4px;" onclick="deleteGalleryItem(\''+g.id+'\')">✕</button><div style="font-size:10px;color:#64748b;text-align:center;">'+ (g.caption || '') +'</div></div>';
       }
       adminVidCont.innerHTML = html;
     }
@@ -1281,6 +1197,7 @@ function deleteGalleryItem(id) {
   }
 }
 
+// LIGHTBOX
 function openLightbox(src, type) {
   var lb = document.getElementById("lightbox");
   var img = document.getElementById("lightboxImg");
@@ -1291,11 +1208,13 @@ function openLightbox(src, type) {
   if (type === 'image') {
     img.src = src;
     img.style.display = 'block';
+    video.pause();
   } else if (type === 'video') {
     video.src = src;
     video.style.display = 'block';
     video.load();
     video.play();
+    img.style.display = 'none';
   }
   lb.classList.add('active');
 }
@@ -1303,8 +1222,107 @@ function openLightbox(src, type) {
 function closeLightbox() {
   var lb = document.getElementById("lightbox");
   var video = document.getElementById("lightboxVideo");
-  if (video) { video.pause(); video.src = ''; }
+  if (video) {
+    video.pause();
+    video.src = '';
+  }
   if (lb) lb.classList.remove('active');
+}
+
+// UPLOAD MEDIA - Firebase Storage
+function uploadGalleryMedia() {
+  var fileInput = document.getElementById("galleryMediaInput");
+  var caption = document.getElementById("galleryCaption").value;
+  var file = fileInput.files[0];
+  if (!file) { alert("Please select an image or video"); return; }
+  
+  var type = file.type.startsWith('video') ? 'video' : 'image';
+  var uploadBtn = document.getElementById('uploadGalleryBtn');
+  if (!uploadBtn) return;
+  var originalText = uploadBtn.innerHTML;
+  uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  uploadBtn.disabled = true;
+  
+  // Try Firebase Storage upload
+  if (useFirebase && firebase.storage) {
+    try {
+      const storageRef = firebase.storage().ref();
+      const fileRef = storageRef.child('gallery/' + Date.now() + '_' + file.name);
+      
+      fileRef.put(file).then(function(snapshot) {
+        return snapshot.ref.getDownloadURL();
+      }).then(function(downloadURL) {
+        appData.gallery.push({
+          id: Date.now().toString(),
+          type: type,
+          data: downloadURL,
+          caption: caption || ""
+        });
+        saveData();
+        document.getElementById("galleryMediaInput").value = "";
+        document.getElementById("galleryCaption").value = "";
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+        renderAll();
+        alert("✅ Uploaded to Firebase cloud!");
+      }).catch(function(error) {
+        console.error('Firebase upload error:', error);
+        fallbackUpload(file, caption, type);
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+      });
+    } catch (error) {
+      console.error('Firebase upload error:', error);
+      fallbackUpload(file, caption, type);
+      uploadBtn.innerHTML = originalText;
+      uploadBtn.disabled = false;
+    }
+  } else {
+    fallbackUpload(file, caption, type);
+    uploadBtn.innerHTML = originalText;
+    uploadBtn.disabled = false;
+  }
+}
+
+function fallbackUpload(file, caption, type) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    appData.gallery.push({
+      id: Date.now().toString(),
+      type: type,
+      data: e.target.result,
+      caption: caption || ""
+    });
+    saveData();
+    document.getElementById("galleryMediaInput").value = "";
+    document.getElementById("galleryCaption").value = "";
+    renderAll();
+    alert("✅ Media saved locally!");
+  };
+  reader.onerror = function() {
+    alert("❌ Failed to read file.");
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateAdminStats() {
+  var total = 5000;
+  var covered = appData.visits.filter(function(v) { return v.status === "Visited"; }).length;
+  var followups = appData.visits.filter(function(v) { return (v.status || "").includes("Follow-up"); }).length;
+  var totalHouses = document.getElementById("adminTotalHouses");
+  var coveredHouses = document.getElementById("adminCoveredHouses");
+  var followupCount = document.getElementById("adminFollowupCount");
+  var issueCount = document.getElementById("adminIssueCount");
+  var coverageFill = document.getElementById("adminCoverageFill");
+  var coverageText = document.getElementById("adminCoverageText");
+  
+  if (totalHouses) totalHouses.innerText = total;
+  if (coveredHouses) coveredHouses.innerText = covered;
+  if (followupCount) followupCount.innerText = followups;
+  if (issueCount) issueCount.innerText = appData.issues.length;
+  var percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
+  if (coverageFill) coverageFill.style.width = percent + "%";
+  if (coverageText) coverageText.innerHTML = currentText.coverage + ': ' + percent.toFixed(1) + '% (' + covered + '/' + total + ')';
 }
 
 function populateVolunteerDropdowns() {
@@ -1362,40 +1380,117 @@ function renderDailyReports() {
   cont.innerHTML = html;
 }
 
-function updateAdminStats() {
-  var total = 5000;
-  var covered = appData.visits.filter(function(v) { return v.status === "Visited"; }).length;
-  var followups = appData.visits.filter(function(v) { return (v.status || "").includes("Follow-up"); }).length;
-  document.getElementById("adminTotalHouses").innerText = total;
-  document.getElementById("adminCoveredHouses").innerText = covered;
-  document.getElementById("adminFollowupCount").innerText = followups;
-  document.getElementById("adminIssueCount").innerText = appData.issues.length;
-  var percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
-  document.getElementById("adminCoverageFill").style.width = percent + "%";
-  document.getElementById("adminCoverageText").innerHTML = currentText.coverage + ': ' + percent.toFixed(1) + '% (' + covered + '/' + total + ')';
+function renderAll() {
+  renderVisits();
+  renderAdminAllVisits();
+  renderAdminAllReports();
+  renderAdminIssues();
+  renderVolunteers();
+  renderPendingVolunteers();
+  renderApprovedVolunteers();
+  renderDailyReports();
+  renderAdminFilteredReports();
+  renderAdminFullReport();
+  renderEvents();
+  renderGallery();
+  renderAdminTeamMessageHistory();
+  updateAdminStats();
+  updateAdminUI();
+  populateAdminTeamDropdown();
 }
 
-function loadData() {
-  try {
-    var saved = localStorage.getItem("electionAppV4");
-    if (saved) {
-      var savedData = JSON.parse(saved);
-      savedData.config = appData.config;
-      if (!savedData.teamMessages) savedData.teamMessages = [];
-      if (!savedData.gallery) savedData.gallery = [];
-      for(var i=0; i<savedData.volunteers.length; i++) {
-        if (!savedData.volunteers[i].status) savedData.volunteers[i].status = "pending";
-      }
-      appData = savedData;
-    }
-  } catch(error) {
-    console.log(error);
-    localStorage.removeItem("electionAppV4");
+// ======================= DATA PERSISTENCE WITH FIRESTORE =======================
+
+// Save data to Firestore
+function saveData() {
+  // First save locally
+  // Then sync to Firestore if available
+  if (useFirebase && db) {
+    syncToFirestore();
   }
-  applyConfig();
   renderAll();
+  updateAdminUI();
   populateFilters();
   populateVolunteerDropdowns();
+}
+
+// Sync all collections to Firestore
+async function syncToFirestore() {
+  if (!useFirebase || !db) return;
+  
+  try {
+    const batch = db.batch();
+    const collections = [
+      { name: 'visits', data: appData.visits },
+      { name: 'issues', data: appData.issues },
+      { name: 'volunteers', data: appData.volunteers },
+      { name: 'dailyReports', data: appData.dailyReports },
+      { name: 'events', data: appData.events },
+      { name: 'teamMessages', data: appData.teamMessages }
+    ];
+    
+    for (const coll of collections) {
+      for (const item of coll.data) {
+        const docRef = db.collection(coll.name).doc(item.id || 'temp');
+        batch.set(docRef, item, { merge: true });
+      }
+    }
+    
+    await batch.commit();
+    document.getElementById('syncText').textContent = 'Synced ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+  } catch(err) {
+    console.warn('Firestore sync error:', err.message);
+    document.getElementById('syncText').textContent = 'Sync pending';
+    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  }
+}
+
+// Load data from Firestore
+async function loadFromFirestore() {
+  if (!useFirebase || !db) return;
+  
+  try {
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages'];
+    
+    for (const collName of collections) {
+      const snapshot = await db.collection(collName).get();
+      const data = [];
+      snapshot.forEach(doc => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Map collection name to appData key
+      const keyMap = {
+        'visits': 'visits',
+        'issues': 'issues',
+        'volunteers': 'volunteers',
+        'dailyReports': 'dailyReports',
+        'events': 'events',
+        'teamMessages': 'teamMessages'
+      };
+      
+      if (keyMap[collName]) {
+        // Ensure volunteers have status field
+        if (collName === 'volunteers') {
+          appData[keyMap[collName]] = data.map(v => ({ ...v, status: v.status || 'pending' }));
+        } else {
+          appData[keyMap[collName]] = data;
+        }
+      }
+    }
+    
+    if (!appData.gallery) appData.gallery = [];
+    renderAll();
+    populateFilters();
+    populateVolunteerDropdowns();
+    populateAdminTeamDropdown();
+    
+    document.getElementById('syncText').textContent = 'Cloud Loaded ✓';
+    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+  } catch(err) {
+    console.warn('Load from Firestore error:', err.message);
+  }
 }
 
 function applyConfig() {
@@ -1407,6 +1502,7 @@ function applyConfig() {
   if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
 }
 
+// ======================= NAVIGATION =======================
 function goToPage(pageId) {
   if (isAdmin) return;
   var pages = document.querySelectorAll('.page');
@@ -1420,9 +1516,7 @@ function goToPage(pageId) {
   }
 }
 
-// ============================================================
-// SETUP
-// ============================================================
+// ======================= SETUP =======================
 document.addEventListener('DOMContentLoaded', function() {
   // Navigation
   var navItems = document.querySelectorAll('.nav-item');
@@ -1436,210 +1530,201 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Save Visit
-  document.getElementById("saveVisitBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var houseNo = document.getElementById("houseNo").value; 
-    if(!houseNo){ alert("Please enter house number"); return; } 
-    appData.visits.push({
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      houseNo: houseNo, 
-      familyName: document.getElementById("familyName").value, 
-      mobile: document.getElementById("mobileD2D").value, 
-      status: document.getElementById("visitStatus").value, 
-      volunteer: document.getElementById("volunteerNameD2D").value
-    }); 
-    saveData(); 
-    document.getElementById("houseNo").value=""; 
-    document.getElementById("familyName").value=""; 
-    document.getElementById("mobileD2D").value=""; 
-    alert(currentText.savedMsg); 
-  });
+  var saveVisitBtn = document.getElementById("saveVisitBtn");
+  if (saveVisitBtn) {
+    saveVisitBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var houseNo = document.getElementById("houseNo").value; 
+      if(!houseNo){ alert("Please enter house number"); return; } 
+      appData.visits.push({
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        houseNo: houseNo, 
+        familyName: document.getElementById("familyName").value, 
+        mobile: document.getElementById("mobileD2D").value, 
+        status: document.getElementById("visitStatus").value, 
+        volunteer: document.getElementById("volunteerNameD2D").value,
+        date: new Date()
+      }); 
+      saveData(); 
+      document.getElementById("houseNo").value=""; 
+      document.getElementById("familyName").value=""; 
+      document.getElementById("mobileD2D").value=""; 
+      alert(currentText.savedMsg); 
+    });
+  }
 
   // Save Issue
-  document.getElementById("saveIssueBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var name = document.getElementById("issuePersonName").value; 
-    if(!name){ alert("Please enter your name"); return; } 
-    appData.issues.push({
-      id: Date.now().toString(),
-      name: name, 
-      mobile: document.getElementById("issuePersonMobile").value, 
-      area: document.getElementById("issueArea").value, 
-      category: document.getElementById("issueCategory").value, 
-      desc: document.getElementById("issueDesc").value
-    }); 
-    saveData(); 
-    document.getElementById("issuePersonName").value=""; 
-    document.getElementById("issuePersonMobile").value=""; 
-    document.getElementById("issueArea").value=""; 
-    document.getElementById("issueDesc").value=""; 
-    alert(currentText.submittedMsg); 
-  });
+  var saveIssueBtn = document.getElementById("saveIssueBtn");
+  if (saveIssueBtn) {
+    saveIssueBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var name = document.getElementById("issuePersonName").value; 
+      if(!name){ alert("Please enter your name"); return; } 
+      appData.issues.push({
+        id: Date.now().toString(),
+        name: name, 
+        mobile: document.getElementById("issuePersonMobile").value, 
+        area: document.getElementById("issueArea").value, 
+        category: document.getElementById("issueCategory").value, 
+        desc: document.getElementById("issueDesc").value
+      }); 
+      saveData(); 
+      document.getElementById("issuePersonName").value=""; 
+      document.getElementById("issuePersonMobile").value=""; 
+      document.getElementById("issueArea").value=""; 
+      document.getElementById("issueDesc").value=""; 
+      alert(currentText.submittedMsg); 
+    });
+  }
 
-  // Volunteer Registration
-  document.getElementById("addVolunteerRegBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var name = document.getElementById("volNameReg").value; 
-    var mobile = document.getElementById("volMobileReg").value; 
-    if(!name || !mobile){ alert("Please fill volunteer details"); return; } 
-    appData.volunteers.push({
-      id: Date.now().toString(),
-      name: name, 
-      mobile: mobile, 
-      area: document.getElementById("volAreaReg").value,
-      status: "pending"
-    }); 
-    saveData(); 
-    document.getElementById("volNameReg").value=""; 
-    document.getElementById("volMobileReg").value=""; 
-    document.getElementById("volAreaReg").value=""; 
-    alert("Registration submitted! Waiting for admin approval.");
-    populateFilters();
-    populateVolunteerDropdowns();
-  });
+  // Public Volunteer Registration
+  var addVolunteerRegBtn = document.getElementById("addVolunteerRegBtn");
+  if (addVolunteerRegBtn) {
+    addVolunteerRegBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var name = document.getElementById("volNameReg").value; 
+      var mobile = document.getElementById("volMobileReg").value; 
+      if(!name || !mobile){ alert("Please fill volunteer details"); return; } 
+      var exists = false;
+      for(var i=0; i<appData.volunteers.length; i++) {
+        if (appData.volunteers[i].mobile === mobile) { exists = true; break; }
+      }
+      if (exists) { alert("This mobile number is already registered!"); return; }
+      appData.volunteers.push({
+        id: Date.now().toString(),
+        name: name, 
+        mobile: mobile, 
+        area: document.getElementById("volAreaReg").value,
+        status: "pending"
+      }); 
+      saveData(); 
+      document.getElementById("volNameReg").value=""; 
+      document.getElementById("volMobileReg").value=""; 
+      document.getElementById("volAreaReg").value=""; 
+      alert("Registration submitted! Waiting for admin approval.");
+      populateFilters();
+      populateVolunteerDropdowns();
+    });
+  }
 
   // Submit Daily Report
-  document.getElementById("submitDailyReportBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var vol = document.getElementById("dailyVolName").value; 
-    var houses = document.getElementById("housesVisitedDaily").value; 
-    if(!vol || !houses){ alert("Please fill report details"); return; } 
-    appData.dailyReports.push({
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      volunteer: vol, 
-      housesVisited: houses, 
-      notes: document.getElementById("dailyNotes").value
-    }); 
-    saveData(); 
-    document.getElementById("housesVisitedDaily").value=""; 
-    document.getElementById("dailyNotes").value=""; 
-    alert(currentText.report); 
-  });
+  var submitDailyReportBtn = document.getElementById("submitDailyReportBtn");
+  if (submitDailyReportBtn) {
+    submitDailyReportBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var vol = document.getElementById("dailyVolName").value; 
+      var houses = document.getElementById("housesVisitedDaily").value; 
+      if(!vol || !houses){ alert("Please fill report details"); return; } 
+      appData.dailyReports.push({
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        volunteer: vol, 
+        housesVisited: houses, 
+        notes: document.getElementById("dailyNotes").value
+      }); 
+      saveData(); 
+      document.getElementById("housesVisitedDaily").value=""; 
+      document.getElementById("dailyNotes").value=""; 
+      alert(currentText.report); 
+    });
+  }
 
   // Export CSV
-  document.getElementById("exportVisitsBtn").addEventListener("click", function() { 
-    if (isAdmin) return;
-    var csv = "House No,Family,Mobile,Status,Volunteer\n"; 
-    for(var i=0; i<appData.visits.length; i++) {
-      var v = appData.visits[i];
-      csv+='"'+v.houseNo+'","'+v.familyName+'","'+v.mobile+'","'+v.status+'","'+v.volunteer+'"\n';
-    }
-    var a=document.createElement("a"); 
-    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); 
-    a.download="campaign_data.csv";  
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-
-  // Admin: Add Team Member
-  document.getElementById("adminAddVolunteerBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    var name = document.getElementById("adminVolName").value;
-    var mobile = document.getElementById("adminVolMobile").value;
-    var area = document.getElementById("adminVolArea").value;
-    if (!name || !mobile) { alert("Please fill Name and Mobile!"); return; }
-    appData.volunteers.push({
-      id: Date.now().toString(),
-      name: name,
-      mobile: mobile,
-      area: area || '',
-      status: "approved"
-    });
-    saveData();
-    document.getElementById("adminVolName").value = "";
-    document.getElementById("adminVolMobile").value = "";
-    document.getElementById("adminVolArea").value = "";
-    alert("✅ Team member added!");
-    renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
-    populateAdminTeamDropdown();
-  });
-
-  // Admin: Send Team Message
-  document.getElementById("adminSendTeamMsgBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    var sel = document.getElementById("adminTeamMemberSelect");
-    var selectedValue = sel ? sel.value : 'all';
-    var message = document.getElementById("adminCustomMessage").value;
-    if (!message || message.trim() === '') {
-      alert("Please enter a message.");
-      return;
-    }
-    
-    var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
-    if (approved.length === 0) {
-      alert("No team members!");
-      return;
-    }
-    
-    var sentCount = 0;
-    for(var i=0; i<approved.length; i++) {
-      var member = approved[i];
-      var mobile = member.mobile;
-      if (!mobile) continue;
-      var phone = mobile.replace(/[^0-9]/g, '');
-      if (phone.length < 10) continue;
-      if (phone.length === 10) phone = '91' + phone;
-      
-      appData.teamMessages.push({
-        id: Date.now().toString() + '_' + i,
-        timestamp: new Date().toLocaleString(),
-        memberName: member.name,
-        memberMobile: mobile,
-        message: message,
-        sentBy: 'Admin',
-        isBulk: true
-      });
-      sentCount++;
-      if (i === 0) {
-        window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(message), '_blank');
+  var exportVisitsBtn = document.getElementById("exportVisitsBtn");
+  if (exportVisitsBtn) {
+    exportVisitsBtn.addEventListener("click", function() { 
+      if (isAdmin) return;
+      var csv = "House No,Family,Mobile,Status,Volunteer\n"; 
+      for(var i=0; i<appData.visits.length; i++) {
+        var v = appData.visits[i];
+        csv+='"'+v.houseNo+'","'+v.familyName+'","'+v.mobile+'","'+v.status+'","'+v.volunteer+'"\n';
       }
-    }
-    saveData();
-    document.getElementById("adminSendStatus").innerHTML = '✅ Sent to ' + sentCount + ' members';
-    renderAll();
-    populateAdminTeamDropdown();
-  });
+      var a=document.createElement("a"); 
+      a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); 
+      a.download="campaign_data.csv";  
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  }
 
-  // Admin: Message template
-  document.getElementById("adminMsgTemplate").addEventListener("change", function() {
-    document.getElementById("adminCustomMessage").value = getAdminMessageTemplate(this.value);
-  });
+  // ADMIN: Add Team Member
+  var adminAddVolunteerBtn = document.getElementById("adminAddVolunteerBtn");
+  if (adminAddVolunteerBtn) {
+    adminAddVolunteerBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      adminAddTeamMember();
+    });
+  }
+
+  // ADMIN: Send Team Message
+  var adminSendTeamMsgBtn = document.getElementById("adminSendTeamMsgBtn");
+  if (adminSendTeamMsgBtn) {
+    adminSendTeamMsgBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      adminSendTeamWhatsApp();
+    });
+  }
+
+  // ADMIN: Message template change
+  var adminMsgTemplate = document.getElementById("adminMsgTemplate");
+  if (adminMsgTemplate) {
+    adminMsgTemplate.addEventListener("change", function() {
+      var val = this.value;
+      var customMsg = document.getElementById("adminCustomMessage");
+      if (val === 'custom') {
+        if (customMsg) {
+          customMsg.value = '';
+          customMsg.placeholder = 'Type your custom message here...';
+        }
+      } else {
+        if (customMsg) {
+          customMsg.value = getAdminMessageTemplate(val);
+        }
+      }
+    });
+  }
 
   // Admin Login
-  document.getElementById("adminLoginBtn").addEventListener("click", loginAdmin);
-  document.getElementById("adminToggleBtn").addEventListener("click", toggleAdminLogin);
-  document.getElementById("adminLogoutBtn").addEventListener("click", logoutAdmin);
+  var adminLoginBtn = document.getElementById("adminLoginBtn");
+  if (adminLoginBtn) adminLoginBtn.addEventListener("click", loginAdmin);
+  var adminToggleBtn = document.getElementById("adminToggleBtn");
+  if (adminToggleBtn) adminToggleBtn.addEventListener("click", toggleAdminLogin);
+  var adminLogoutBtn = document.getElementById("adminLogoutBtn");
+  if (adminLogoutBtn) adminLogoutBtn.addEventListener("click", logoutAdmin);
 
   // Admin: Add Event
-  document.getElementById("addEventBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    var title = document.getElementById("eventTitle").value;
-    var date = document.getElementById("eventDate").value;
-    var desc = document.getElementById("eventDesc").value;
-    if (!title || !date) { alert("Please fill title and date"); return; }
-    appData.events.push({
-      id: Date.now().toString(),
-      title: title,
-      date: date,
-      desc: desc
+  var addEventBtn = document.getElementById("addEventBtn");
+  if (addEventBtn) {
+    addEventBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      var title = document.getElementById("eventTitle").value;
+      var date = document.getElementById("eventDate").value;
+      var desc = document.getElementById("eventDesc").value;
+      if (!title || !date) { alert("Please fill event title and date"); return; }
+      appData.events.push({
+        id: Date.now().toString(),
+        title: title,
+        date: date,
+        desc: desc
+      });
+      saveData();
+      document.getElementById("eventTitle").value = "";
+      document.getElementById("eventDate").value = "";
+      document.getElementById("eventDesc").value = "";
+      alert("Event added successfully!");
     });
-    saveData();
-    document.getElementById("eventTitle").value = "";
-    document.getElementById("eventDate").value = "";
-    document.getElementById("eventDesc").value = "";
-    alert("Event added!");
-  });
+  }
 
-  // Admin: Upload Gallery
-  document.getElementById("uploadGalleryBtn").addEventListener("click", function() {
-    if (!isAdmin) return;
-    uploadGalleryMedia();
-  });
+  // Admin: Upload Gallery Media
+  var uploadGalleryBtn = document.getElementById("uploadGalleryBtn");
+  if (uploadGalleryBtn) {
+    uploadGalleryBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      uploadGalleryMedia();
+    });
+  }
 
   // Language buttons
   var langBtns = document.querySelectorAll(".lang-btn");
@@ -1650,37 +1735,51 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Admin password enter key
-  document.getElementById("adminPass").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") loginAdmin();
-  });
+  var adminPass = document.getElementById("adminPass");
+  if (adminPass) {
+    adminPass.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") loginAdmin();
+    });
+  }
 
-  // Load data
-  loadData();
+  // Load data and sync from Firestore
   setLanguage("en");
   
-  // Auto load from cloud after 2 seconds
+  // Try to load from Firestore after local setup
   setTimeout(function() {
-    if (useSupabase && supabaseClient) {
-      loadAllFromCloud();
+    if (useFirebase && db) {
+      loadFromFirestore();
     }
-  }, 2000);
+  }, 500);
+
+  // Periodic sync every 30 seconds
+  if (useFirebase && db) {
+    setInterval(function() {
+      syncToFirestore();
+    }, 30000);
+  }
 });
 
 // Expose functions globally
 window.goToPage = goToPage;
 window.approveVolunteer = approveVolunteer;
+window.deleteVolunteer = deleteVolunteer;
+window.deleteApprovedVolunteer = deleteApprovedVolunteer;
 window.deleteEvent = deleteEvent;
 window.deleteGalleryItem = deleteGalleryItem;
+window.deleteIssue = deleteIssue;
+window.deleteAdminReport = deleteAdminReport;
+window.deleteVisit = deleteVisit;
 window.filterAdminReports = filterAdminReports;
 window.setLanguage = setLanguage;
 window.loginAdmin = loginAdmin;
 window.logoutAdmin = logoutAdmin;
 window.toggleAdminLogin = toggleAdminLogin;
+window.adminSendTeamWhatsApp = adminSendTeamWhatsApp;
+window.adminAddTeamMember = adminAddTeamMember;
 window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
-window.syncAllToCloud = syncAllToCloud;
-window.loadAllFromCloud = loadAllFromCloud;
-window.clearLocalData = clearLocalData;
+window.deleteTeamMessage = deleteTeamMessage;
 </script>
 </body>
 </html>
