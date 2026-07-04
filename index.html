@@ -109,7 +109,6 @@
 </head>
 <body>
 <div class="app-container">
-  <!-- Admin Login Overlay -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
       <h2 style="text-align:center;">🔐 Admin Login</h2>
@@ -862,22 +861,101 @@ function renderAdminAllVisits() {
   var html = '';
   for(var i=appData.visits.length-1; i>=0; i--) {
     var v = appData.visits[i];
-    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'</span><br><span style="font-size:12px;color:#64748b;">'+currentText.volunteer+': '+v.volunteer+'</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\''+(v.id || v.timestamp || i)+'\')">🗑️</button></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+v.houseNo+'</strong> - '+v.familyName+'<br><span style="font-size:12px;color:#64748b;">'+currentText.status+': '+(v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' : '⏳ Pending')+'</span><br><span style="font-size:12px;color:#64748b;">'+currentText.volunteer+': '+v.volunteer+'</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\''+v.id+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
 }
 
+// ======================= DELETION FUNCTIONS WITH FIRESTORE =======================
 function deleteVisit(id) {
   if (confirm(currentText.confirmDelete)) {
-    appData.visits = appData.visits.filter(function(v, index) {
-      var vid = v.id || v.timestamp || index;
-      return vid != id;
-    });
-    saveData();
-    renderAll();
+    appData.visits = appData.visits.filter(function(v) { return v.id !== id; });
+    if (useFirebase && db) {
+      db.collection('visits').doc(id).delete()
+        .then(function() { console.log('✅ Visit deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
   }
 }
 
+function deleteAdminReport(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.dailyReports = appData.dailyReports.filter(function(r) { return r.id !== id; });
+    if (useFirebase && db) {
+      db.collection('dailyReports').doc(id).delete()
+        .then(function() { console.log('✅ Report deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteIssue(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.issues = appData.issues.filter(function(issue) { return issue.id !== id; });
+    if (useFirebase && db) {
+      db.collection('issues').doc(id).delete()
+        .then(function() { console.log('✅ Issue deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteVolunteer(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
+    if (useFirebase && db) {
+      db.collection('volunteers').doc(id).delete()
+        .then(function() { console.log('✅ Volunteer deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteApprovedVolunteer(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
+    if (useFirebase && db) {
+      db.collection('volunteers').doc(id).delete()
+        .then(function() { console.log('✅ Volunteer deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteEvent(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.events = appData.events.filter(function(e) { return e.id !== id; });
+    if (useFirebase && db) {
+      db.collection('events').doc(id).delete()
+        .then(function() { console.log('✅ Event deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteGalleryItem(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.gallery = appData.gallery.filter(function(g) { return g.id !== id; });
+    if (useFirebase && db) {
+      db.collection('gallery').doc(id).delete()
+        .then(function() { console.log('✅ Gallery item deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function deleteTeamMessage(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.teamMessages = appData.teamMessages.filter(function(m) { return m.id !== id; });
+    if (useFirebase && db) {
+      db.collection('teamMessages').doc(id).delete()
+        .then(function() { console.log('✅ Message deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+// ======================= RENDER FUNCTIONS (continued) =======================
 function renderAdminAllReports() {
   var cont = document.getElementById("adminAllReports");
   if (!cont) return;
@@ -888,20 +966,9 @@ function renderAdminAllReports() {
   var html = '';
   for(var i=appData.dailyReports.length-1; i>=0; i--) {
     var r = appData.dailyReports[i];
-    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || i)+'\')">🗑️</button></div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+r.id+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
-}
-
-function deleteAdminReport(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.dailyReports = appData.dailyReports.filter(function(r, index) {
-      var rid = r.id || r.timestamp || index;
-      return rid != id;
-    });
-    saveData();
-    renderAll();
-  }
 }
 
 function renderAdminIssues() {
@@ -914,21 +981,9 @@ function renderAdminIssues() {
   var html = '';
   for(var i=appData.issues.length-1; i>=0; i--) {
     var issue = appData.issues[i];
-    var id = issue.id || i;
-    html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#'+(i+1)+' - '+issue.category+'</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\''+id+'\')">🗑️ '+currentText.delete+'</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>'+currentText.name+':</strong> '+issue.name+'</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>'+currentText.mobile+':</strong> '+(issue.mobile || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>'+currentText.area+':</strong> '+(issue.area || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>'+currentText.category+':</strong> '+issue.category+'</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>'+currentText.description+':</strong> '+issue.desc+'</div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#'+(i+1)+' - '+issue.category+'</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\''+issue.id+'\')">🗑️ '+currentText.delete+'</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>'+currentText.name+':</strong> '+issue.name+'</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>'+currentText.mobile+':</strong> '+(issue.mobile || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>'+currentText.area+':</strong> '+(issue.area || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>'+currentText.category+':</strong> '+issue.category+'</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>'+currentText.description+':</strong> '+issue.desc+'</div></div>';
   }
   cont.innerHTML = html;
-}
-
-function deleteIssue(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.issues = appData.issues.filter(function(issue, index) {
-      var issueId = issue.id || index;
-      return issueId != id;
-    });
-    saveData();
-    renderAll();
-  }
 }
 
 function renderPendingVolunteers() {
@@ -977,28 +1032,6 @@ function approveVolunteer(id) {
   populateAdminTeamDropdown();
 }
 
-function deleteVolunteer(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
-    saveData();
-    renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
-    populateAdminTeamDropdown();
-  }
-}
-
-function deleteApprovedVolunteer(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.volunteers = appData.volunteers.filter(function(v) { return v.id !== id; });
-    saveData();
-    renderAll();
-    populateFilters();
-    populateVolunteerDropdowns();
-    populateAdminTeamDropdown();
-  }
-}
-
 function renderAdminFilteredReports() {
   var cont = document.getElementById("adminFilteredReports");
   if (!cont) return;
@@ -1017,7 +1050,7 @@ function renderAdminFilteredReports() {
   var html = '<div style="background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px;"><strong>'+currentText.totalVisits+': '+totalHouses+'</strong> | '+currentText.totalReports+': '+reports.length+'</div>';
   for(var j=reports.length-1; j>=0; j--) {
     var r = reports[j];
-    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+(r.id || r.timestamp || j)+'\')">🗑️</button></div></div>';
+    html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+r.volunteer+'</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 '+r.housesVisited+' '+currentText.housesVisited+'</span><div style="font-size:12px;color:#475569;margin-top:2px;">'+(r.notes || '')+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\''+r.id+'\')">🗑️</button></div></div>';
   }
   cont.innerHTML = html;
 }
@@ -1071,14 +1104,6 @@ function renderAdminTeamMessageHistory() {
   cont.innerHTML = html;
 }
 
-function deleteTeamMessage(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.teamMessages = appData.teamMessages.filter(function(m) { return m.id !== id; });
-    saveData();
-    renderAll();
-  }
-}
-
 function renderEvents() {
   var pubCont = document.getElementById("publicEventsList");
   if (pubCont) {
@@ -1108,15 +1133,6 @@ function renderEvents() {
   }
 }
 
-function deleteEvent(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.events = appData.events.filter(function(e) { return e.id !== id; });
-    saveData();
-    renderAll();
-  }
-}
-
-// GALLERY RENDERING
 function renderGallery() {
   var pubCont = document.getElementById("publicGalleryEvents");
   var adminImgCont = document.getElementById("adminGalleryGrid");
@@ -1191,15 +1207,6 @@ function renderGallery() {
   }
 }
 
-function deleteGalleryItem(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.gallery = appData.gallery.filter(function(g) { return g.id !== id; });
-    saveData();
-    renderAll();
-  }
-}
-
-// LIGHTBOX
 function openLightbox(src, type) {
   var lb = document.getElementById("lightbox");
   var img = document.getElementById("lightboxImg");
@@ -1231,7 +1238,6 @@ function closeLightbox() {
   if (lb) lb.classList.remove('active');
 }
 
-// UPLOAD MEDIA - Firebase Storage
 function uploadGalleryMedia() {
   var fileInput = document.getElementById("galleryMediaInput");
   var caption = document.getElementById("galleryCaption").value;
@@ -1245,7 +1251,6 @@ function uploadGalleryMedia() {
   uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
   uploadBtn.disabled = true;
   
-  // Try Firebase Storage upload
   if (useFirebase && firebase.storage) {
     try {
       const storageRef = firebase.storage().ref();
@@ -1254,13 +1259,19 @@ function uploadGalleryMedia() {
       fileRef.put(file).then(function(snapshot) {
         return snapshot.ref.getDownloadURL();
       }).then(function(downloadURL) {
-        appData.gallery.push({
+        var newItem = {
           id: Date.now().toString(),
           type: type,
           data: downloadURL,
           caption: caption || ""
-        });
-        saveData();
+        };
+        appData.gallery.push(newItem);
+        // Save to Firestore
+        if (useFirebase && db) {
+          db.collection('gallery').doc(newItem.id).set(newItem, { merge: true })
+            .then(function() { console.log('✅ Gallery item saved to Firestore'); })
+            .catch(function(error) { console.error('Save error:', error); });
+        }
         document.getElementById("galleryMediaInput").value = "";
         document.getElementById("galleryCaption").value = "";
         uploadBtn.innerHTML = originalText;
@@ -1289,13 +1300,18 @@ function uploadGalleryMedia() {
 function fallbackUpload(file, caption, type) {
   var reader = new FileReader();
   reader.onload = function(e) {
-    appData.gallery.push({
+    var newItem = {
       id: Date.now().toString(),
       type: type,
       data: e.target.result,
       caption: caption || ""
-    });
-    saveData();
+    };
+    appData.gallery.push(newItem);
+    if (useFirebase && db) {
+      db.collection('gallery').doc(newItem.id).set(newItem, { merge: true })
+        .then(function() { console.log('✅ Gallery item saved to Firestore (base64)'); })
+        .catch(function(error) { console.error('Save error:', error); });
+    }
     document.getElementById("galleryMediaInput").value = "";
     document.getElementById("galleryCaption").value = "";
     renderAll();
@@ -1403,9 +1419,7 @@ function renderAll() {
 
 // ======================= DATA PERSISTENCE WITH FIRESTORE =======================
 
-// Save data to Firestore
 function saveData() {
-  // Save to Firestore
   if (useFirebase && db) {
     syncToFirestore();
   }
@@ -1415,35 +1429,22 @@ function saveData() {
   populateVolunteerDropdowns();
 }
 
-// Sync all collections to Firestore - FIXED VERSION
 async function syncToFirestore() {
-  if (!useFirebase || !db) {
-    console.warn('Firebase not available');
-    return;
-  }
-  
-  // Don't sync while loading from Firestore to avoid loops
-  if (isLoadingFromFirestore) {
-    return;
-  }
+  if (!useFirebase || !db) return;
+  if (isLoadingFromFirestore) return;
   
   try {
     console.log('🔄 Syncing data to Firestore...');
-    
-    // Save each collection separately for better reliability
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
     
     for (const collName of collections) {
       const collectionRef = db.collection(collName);
       const items = appData[collName] || [];
       
       for (const item of items) {
-        // Ensure each item has an ID
         if (!item.id) {
           item.id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
         }
-        
-        // Save to Firestore
         await collectionRef.doc(item.id).set(item, { merge: true });
       }
     }
@@ -1451,7 +1452,6 @@ async function syncToFirestore() {
     document.getElementById('syncText').textContent = 'Synced ✓';
     document.getElementById('syncStatus').className = 'sync-status firebase-connected';
     console.log('✅ Data synced to Firestore successfully!');
-    
   } catch(err) {
     console.error('Firestore sync error:', err.message);
     document.getElementById('syncText').textContent = 'Sync error';
@@ -1459,7 +1459,6 @@ async function syncToFirestore() {
   }
 }
 
-// Load data from Firestore
 async function loadFromFirestore() {
   if (!useFirebase || !db) return;
   
@@ -1467,8 +1466,7 @@ async function loadFromFirestore() {
   
   try {
     console.log('🔄 Loading data from Firestore...');
-    
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
     
     for (const collName of collections) {
       const snapshot = await db.collection(collName).get();
@@ -1483,7 +1481,8 @@ async function loadFromFirestore() {
         'volunteers': 'volunteers',
         'dailyReports': 'dailyReports',
         'events': 'events',
-        'teamMessages': 'teamMessages'
+        'teamMessages': 'teamMessages',
+        'gallery': 'gallery'
       };
       
       if (keyMap[collName]) {
@@ -1495,7 +1494,6 @@ async function loadFromFirestore() {
       }
     }
     
-    if (!appData.gallery) appData.gallery = [];
     renderAll();
     populateFilters();
     populateVolunteerDropdowns();
@@ -1511,6 +1509,24 @@ async function loadFromFirestore() {
   }
 }
 
+// ======================= REAL-TIME LISTENERS =======================
+
+function setupRealtimeListeners() {
+  if (!useFirebase || !db) return;
+  
+  const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
+  
+  for (const collName of collections) {
+    db.collection(collName).onSnapshot(function(snapshot) {
+      if (isLoadingFromFirestore) return;
+      console.log('🔄 Real-time update detected for:', collName);
+      loadFromFirestore();
+    }, function(error) {
+      console.error('Listener error for', collName, error);
+    });
+  }
+}
+
 function applyConfig() {
   var photo = document.getElementById("candidatePhoto");
   var waLink = document.getElementById("waLink");
@@ -1520,7 +1536,6 @@ function applyConfig() {
   if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
 }
 
-// ======================= NAVIGATION =======================
 function goToPage(pageId) {
   if (isAdmin) return;
   var pages = document.querySelectorAll('.page');
@@ -1536,7 +1551,6 @@ function goToPage(pageId) {
 
 // ======================= SETUP =======================
 document.addEventListener('DOMContentLoaded', function() {
-  // Navigation
   var navItems = document.querySelectorAll('.nav-item');
   for(var i=0; i<navItems.length; i++) {
     navItems[i].addEventListener('click', function(e) {
@@ -1554,7 +1568,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (isAdmin) return;
       var houseNo = document.getElementById("houseNo").value; 
       if(!houseNo){ alert("Please enter house number"); return; } 
-      appData.visits.push({
+      var newVisit = {
         id: Date.now().toString(),
         timestamp: Date.now(),
         houseNo: houseNo, 
@@ -1563,12 +1577,18 @@ document.addEventListener('DOMContentLoaded', function() {
         status: document.getElementById("visitStatus").value, 
         volunteer: document.getElementById("volunteerNameD2D").value,
         date: new Date()
-      }); 
-      saveData(); 
+      };
+      appData.visits.push(newVisit);
+      if (useFirebase && db) {
+        db.collection('visits').doc(newVisit.id).set(newVisit, { merge: true })
+          .then(function() { console.log('✅ Visit saved to Firestore'); })
+          .catch(function(error) { console.error('Save error:', error); });
+      }
       document.getElementById("houseNo").value=""; 
       document.getElementById("familyName").value=""; 
       document.getElementById("mobileD2D").value=""; 
-      alert(currentText.savedMsg); 
+      alert(currentText.savedMsg);
+      renderAll();
     });
   }
 
@@ -1579,20 +1599,26 @@ document.addEventListener('DOMContentLoaded', function() {
       if (isAdmin) return;
       var name = document.getElementById("issuePersonName").value; 
       if(!name){ alert("Please enter your name"); return; } 
-      appData.issues.push({
+      var newIssue = {
         id: Date.now().toString(),
         name: name, 
         mobile: document.getElementById("issuePersonMobile").value, 
         area: document.getElementById("issueArea").value, 
         category: document.getElementById("issueCategory").value, 
         desc: document.getElementById("issueDesc").value
-      }); 
-      saveData(); 
+      };
+      appData.issues.push(newIssue);
+      if (useFirebase && db) {
+        db.collection('issues').doc(newIssue.id).set(newIssue, { merge: true })
+          .then(function() { console.log('✅ Issue saved to Firestore'); })
+          .catch(function(error) { console.error('Save error:', error); });
+      }
       document.getElementById("issuePersonName").value=""; 
       document.getElementById("issuePersonMobile").value=""; 
       document.getElementById("issueArea").value=""; 
       document.getElementById("issueDesc").value=""; 
-      alert(currentText.submittedMsg); 
+      alert(currentText.submittedMsg);
+      renderAll();
     });
   }
 
@@ -1609,20 +1635,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (appData.volunteers[i].mobile === mobile) { exists = true; break; }
       }
       if (exists) { alert("This mobile number is already registered!"); return; }
-      appData.volunteers.push({
+      var newVol = {
         id: Date.now().toString(),
         name: name, 
         mobile: mobile, 
         area: document.getElementById("volAreaReg").value,
         status: "pending"
-      }); 
-      saveData(); 
+      };
+      appData.volunteers.push(newVol);
+      if (useFirebase && db) {
+        db.collection('volunteers').doc(newVol.id).set(newVol, { merge: true })
+          .then(function() { console.log('✅ Volunteer saved to Firestore'); })
+          .catch(function(error) { console.error('Save error:', error); });
+      }
       document.getElementById("volNameReg").value=""; 
       document.getElementById("volMobileReg").value=""; 
       document.getElementById("volAreaReg").value=""; 
       alert("Registration submitted! Waiting for admin approval.");
       populateFilters();
       populateVolunteerDropdowns();
+      renderAll();
     });
   }
 
@@ -1634,17 +1666,23 @@ document.addEventListener('DOMContentLoaded', function() {
       var vol = document.getElementById("dailyVolName").value; 
       var houses = document.getElementById("housesVisitedDaily").value; 
       if(!vol || !houses){ alert("Please fill report details"); return; } 
-      appData.dailyReports.push({
+      var newReport = {
         id: Date.now().toString(),
         timestamp: Date.now(),
         volunteer: vol, 
         housesVisited: houses, 
         notes: document.getElementById("dailyNotes").value
-      }); 
-      saveData(); 
+      };
+      appData.dailyReports.push(newReport);
+      if (useFirebase && db) {
+        db.collection('dailyReports').doc(newReport.id).set(newReport, { merge: true })
+          .then(function() { console.log('✅ Report saved to Firestore'); })
+          .catch(function(error) { console.error('Save error:', error); });
+      }
       document.getElementById("housesVisitedDaily").value=""; 
       document.getElementById("dailyNotes").value=""; 
-      alert(currentText.report); 
+      alert(currentText.report);
+      renderAll();
     });
   }
 
@@ -1721,17 +1759,23 @@ document.addEventListener('DOMContentLoaded', function() {
       var date = document.getElementById("eventDate").value;
       var desc = document.getElementById("eventDesc").value;
       if (!title || !date) { alert("Please fill event title and date"); return; }
-      appData.events.push({
+      var newEvent = {
         id: Date.now().toString(),
         title: title,
         date: date,
         desc: desc
-      });
-      saveData();
+      };
+      appData.events.push(newEvent);
+      if (useFirebase && db) {
+        db.collection('events').doc(newEvent.id).set(newEvent, { merge: true })
+          .then(function() { console.log('✅ Event saved to Firestore'); })
+          .catch(function(error) { console.error('Save error:', error); });
+      }
       document.getElementById("eventTitle").value = "";
       document.getElementById("eventDate").value = "";
       document.getElementById("eventDesc").value = "";
       alert("Event added successfully!");
+      renderAll();
     });
   }
 
@@ -1760,17 +1804,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Load data and sync from Firestore
   setLanguage("en");
   
-  // Try to load from Firestore after local setup
   setTimeout(function() {
     if (useFirebase && db) {
       loadFromFirestore();
+      setupRealtimeListeners();
     }
   }, 500);
 
-  // Periodic sync every 30 seconds
   if (useFirebase && db) {
     setInterval(function() {
       syncToFirestore();
@@ -1778,7 +1820,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Expose functions globally
 window.goToPage = goToPage;
 window.approveVolunteer = approveVolunteer;
 window.deleteVolunteer = deleteVolunteer;
