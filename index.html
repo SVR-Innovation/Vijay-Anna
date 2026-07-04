@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
   <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
+  <!-- SEO Meta -->
+  <meta name="description" content="Mana Vijay Anna Election Campaign - Corporator Election. Door to door, volunteer registration, issue reporting.">
+  <meta name="theme-color" content="#0f2b3d">
+  <link rel="manifest" href="manifest.json">
+  <!-- PWA icons -->
+  <link rel="apple-touch-icon" href="images/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Firebase SDK -->
@@ -105,18 +111,21 @@
     .badge-premium{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2px 12px;border-radius:30px;font-size:9px;}
     .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
+    /* PWA install banner style */
+    .install-banner{background:#0f2b3d;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:10px;}
+    .install-banner button{background:#e85d3a;border:none;color:white;padding:6px 16px;border-radius:30px;font-weight:600;cursor:pointer;}
   </style>
 </head>
 <body>
 <div class="app-container">
+  <!-- Login Overlay - no default credentials shown -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
       <h2 style="text-align:center;">🔐 Admin Login</h2>
       <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">Enter admin credentials</p>
-      <div class="input-group"><input type="text" id="adminUser" placeholder="Username" value="admin"></div>
-      <div class="input-group"><input type="password" id="adminPass" placeholder="Password" value="admin123"></div>
+      <div class="input-group"><input type="text" id="adminUser" placeholder="Username"></div>
+      <div class="input-group"><input type="password" id="adminPass" placeholder="Password"></div>
       <button type="button" id="adminLoginBtn" class="btn">Login</button>
-      <p style="text-align:center;font-size:11px;color:#94a3b8;margin-top:8px;">Default: admin / admin123</p>
     </div>
   </div>
 
@@ -138,6 +147,11 @@
 
   <!-- PAGE 1: HOME -->
   <div id="page-home" class="page active">
+    <!-- PWA Install Banner -->
+    <div id="installBanner" class="install-banner hidden">
+      <span><i class="fas fa-download"></i> Install App</span>
+      <button id="installBtn">Install</button>
+    </div>
     <div class="card" style="text-align:center">
       <img id="candidatePhoto" class="candidate-photo" src="./images/vijay.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22130%22 height=%22170%22%3E%3Crect width=%22130%22 height=%22170%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2265%22 y=%2290%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'">
       <h2 id="candidateName" style="font-size:20px;">Mana Vijay Anna</h2>
@@ -159,7 +173,7 @@
         <li style="padding:6px 0;">✅ Women Safety - CCTV Cameras</li>
       </ul>
     </div>
-    <div class="card"><h3>📅 Upcoming Events</h3><div id="publicEventsList"></div></div>
+    <!-- Upcoming Events removed as requested -->
   </div>
 
   <!-- PAGE 2: DOOR TO DOOR -->
@@ -289,14 +303,7 @@
     </div>
     <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
     
-    <div class="card">
-      <h3>📅 Manage Events</h3>
-      <div class="input-group"><input id="eventTitle" placeholder="Event Title"></div>
-      <div class="input-group"><input id="eventDate" type="date"></div>
-      <div class="input-group"><textarea id="eventDesc" rows="2" placeholder="Event Description"></textarea></div>
-      <button type="button" id="addEventBtn" class="btn"><span>Add Event</span></button>
-      <div id="adminEventsList" style="margin-top:10px;"></div>
-    </div>
+    <!-- Manage Events removed from admin as well to keep gallery only -->
     
     <div class="card">
       <h3>🖼️ Manage Gallery <span class="badge-premium">Images & Videos</span></h3>
@@ -579,6 +586,7 @@ function setLanguage(lang) {
 function loginAdmin() {
   var user = document.getElementById("adminUser").value;
   var pass = document.getElementById("adminPass").value;
+  // No default credentials - user must type manually
   if (user === "admin" && pass === "admin123") {
     isAdmin = true;
     var overlay = document.getElementById("loginOverlay");
@@ -638,6 +646,9 @@ function toggleAdminLogin() {
   } else {
     var overlay = document.getElementById("loginOverlay");
     if (overlay) overlay.classList.remove("hidden");
+    // Clear fields so admin has to type manually each time
+    document.getElementById("adminUser").value = "";
+    document.getElementById("adminPass").value = "";
   }
 }
 
@@ -922,17 +933,6 @@ function deleteApprovedVolunteer(id) {
   }
 }
 
-function deleteEvent(id) {
-  if (confirm(currentText.confirmDelete)) {
-    appData.events = appData.events.filter(function(e) { return e.id !== id; });
-    if (useFirebase && db) {
-      db.collection('events').doc(id).delete()
-        .then(function() { console.log('✅ Event deleted from Firestore'); renderAll(); })
-        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
-    } else { saveData(); renderAll(); }
-  }
-}
-
 function deleteGalleryItem(id) {
   if (confirm(currentText.confirmDelete)) {
     appData.gallery = appData.gallery.filter(function(g) { return g.id !== id; });
@@ -1104,35 +1104,7 @@ function renderAdminTeamMessageHistory() {
   cont.innerHTML = html;
 }
 
-function renderEvents() {
-  var pubCont = document.getElementById("publicEventsList");
-  if (pubCont) {
-    if (appData.events.length === 0) {
-      pubCont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
-    } else {
-      var html = '';
-      for(var i=appData.events.length-1; i>=0; i--) {
-        var e = appData.events[i];
-        html += '<div class="event-card"><b>'+e.title+'</b><br>📅 '+e.date+'<br><span style="font-size:13px;color:#64748b;">'+(e.desc || '')+'</span></div>';
-      }
-      pubCont.innerHTML = html;
-    }
-  }
-  var adminCont = document.getElementById("adminEventsList");
-  if (adminCont && isAdmin) {
-    if (appData.events.length === 0) {
-      adminCont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
-    } else {
-      var html = '';
-      for(var i=appData.events.length-1; i>=0; i--) {
-        var e = appData.events[i];
-        html += '<div class="event-card" style="display:flex;justify-content:space-between;align-items:center;"><div><b>'+e.title+'</b> 📅 '+e.date+'</div><button class="btn btn-danger btn-sm" onclick="deleteEvent(\''+e.id+'\')">🗑️ '+currentText.delete+'</button></div>';
-      }
-      adminCont.innerHTML = html;
-    }
-  }
-}
-
+// Events rendering removed from public view - only gallery shows images/videos
 function renderGallery() {
   var pubCont = document.getElementById("publicGalleryEvents");
   var adminImgCont = document.getElementById("adminGalleryGrid");
@@ -1140,18 +1112,9 @@ function renderGallery() {
 
   if (pubCont) {
     var html = '';
-    html += '<h4 style="margin-top:0;">📅 Events</h4>';
-    if (appData.events.length === 0) {
-      html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-calendar-alt"></i>'+currentText.noEvents+'</div>';
-    } else {
-      for(var i=appData.events.length-1; i>=0; i--) {
-        var e = appData.events[i];
-        html += '<div class="event-card"><b>'+e.title+'</b><br>📅 '+e.date+'<br><span style="font-size:13px;color:#64748b;">'+(e.desc || '')+'</span></div>';
-      }
-    }
-    
+    // Only show images and videos, no events
     var images = appData.gallery.filter(function(g) { return g.type === 'image'; });
-    html += '<h4 style="margin-top:14px;">🖼️ Photos</h4>';
+    html += '<h4 style="margin-top:0;">🖼️ Photos</h4>';
     if (images.length === 0) {
       html += '<div class="empty-state" style="padding:10px;"><i class="fas fa-image"></i>No photos</div>';
     } else {
@@ -1266,7 +1229,6 @@ function uploadGalleryMedia() {
           caption: caption || ""
         };
         appData.gallery.push(newItem);
-        // Save to Firestore
         if (useFirebase && db) {
           db.collection('gallery').doc(newItem.id).set(newItem, { merge: true })
             .then(function() { console.log('✅ Gallery item saved to Firestore'); })
@@ -1409,7 +1371,6 @@ function renderAll() {
   renderDailyReports();
   renderAdminFilteredReports();
   renderAdminFullReport();
-  renderEvents();
   renderGallery();
   renderAdminTeamMessageHistory();
   updateAdminStats();
@@ -1435,7 +1396,7 @@ async function syncToFirestore() {
   
   try {
     console.log('🔄 Syncing data to Firestore...');
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
     
     for (const collName of collections) {
       const collectionRef = db.collection(collName);
@@ -1466,7 +1427,7 @@ async function loadFromFirestore() {
   
   try {
     console.log('🔄 Loading data from Firestore...');
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
     
     for (const collName of collections) {
       const snapshot = await db.collection(collName).get();
@@ -1480,9 +1441,8 @@ async function loadFromFirestore() {
         'issues': 'issues',
         'volunteers': 'volunteers',
         'dailyReports': 'dailyReports',
-        'events': 'events',
-        'teamMessages': 'teamMessages',
-        'gallery': 'gallery'
+        'gallery': 'gallery',
+        'teamMessages': 'teamMessages'
       };
       
       if (keyMap[collName]) {
@@ -1514,7 +1474,7 @@ async function loadFromFirestore() {
 function setupRealtimeListeners() {
   if (!useFirebase || !db) return;
   
-  const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages', 'gallery'];
+  const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
   
   for (const collName of collections) {
     db.collection(collName).onSnapshot(function(snapshot) {
@@ -1548,6 +1508,30 @@ function goToPage(pageId) {
     if (navs[j].getAttribute('data-page') === pageId) navs[j].classList.add('active');
   }
 }
+
+// ======================= PWA INSTALL =======================
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.classList.remove('hidden');
+});
+
+document.getElementById('installBtn')?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      document.getElementById('installBanner').classList.add('hidden');
+    }
+    deferredPrompt = null;
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.add('hidden');
+});
 
 // ======================= SETUP =======================
 document.addEventListener('DOMContentLoaded', function() {
@@ -1750,35 +1734,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var adminLogoutBtn = document.getElementById("adminLogoutBtn");
   if (adminLogoutBtn) adminLogoutBtn.addEventListener("click", logoutAdmin);
 
-  // Admin: Add Event
-  var addEventBtn = document.getElementById("addEventBtn");
-  if (addEventBtn) {
-    addEventBtn.addEventListener("click", function() {
-      if (!isAdmin) return;
-      var title = document.getElementById("eventTitle").value;
-      var date = document.getElementById("eventDate").value;
-      var desc = document.getElementById("eventDesc").value;
-      if (!title || !date) { alert("Please fill event title and date"); return; }
-      var newEvent = {
-        id: Date.now().toString(),
-        title: title,
-        date: date,
-        desc: desc
-      };
-      appData.events.push(newEvent);
-      if (useFirebase && db) {
-        db.collection('events').doc(newEvent.id).set(newEvent, { merge: true })
-          .then(function() { console.log('✅ Event saved to Firestore'); })
-          .catch(function(error) { console.error('Save error:', error); });
-      }
-      document.getElementById("eventTitle").value = "";
-      document.getElementById("eventDate").value = "";
-      document.getElementById("eventDesc").value = "";
-      alert("Event added successfully!");
-      renderAll();
-    });
-  }
-
   // Admin: Upload Gallery Media
   var uploadGalleryBtn = document.getElementById("uploadGalleryBtn");
   if (uploadGalleryBtn) {
@@ -1824,7 +1779,6 @@ window.goToPage = goToPage;
 window.approveVolunteer = approveVolunteer;
 window.deleteVolunteer = deleteVolunteer;
 window.deleteApprovedVolunteer = deleteApprovedVolunteer;
-window.deleteEvent = deleteEvent;
 window.deleteGalleryItem = deleteGalleryItem;
 window.deleteIssue = deleteIssue;
 window.deleteAdminReport = deleteAdminReport;
