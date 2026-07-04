@@ -105,6 +105,8 @@
     .cloud-badge{background:#3b82f6;color:white;padding:1px 8px;border-radius:30px;font-size:8px;margin-left:4px;}
     .sync-btn{background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:40px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
     .sync-btn:hover{background:#7c3aed;}
+    .success-msg{background:#d1fae5;color:#065f46;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
+    .error-msg{background:#fee2e2;color:#991b1b;padding:8px 12px;border-radius:8px;margin:8px 0;display:none;}
   </style>
 </head>
 <body>
@@ -295,6 +297,8 @@
     <div class="card">
       <h3>🖼️ Manage Gallery <span class="badge-premium">☁️ Cloud Storage</span></h3>
       <p style="font-size:12px;color:#64748b;margin-bottom:10px;">Upload images/videos - visible on ALL devices</p>
+      <div id="uploadStatus" class="success-msg"></div>
+      <div id="uploadError" class="error-msg"></div>
       <div class="input-group"><input type="file" id="galleryMediaInput" accept="image/*,video/*"></div>
       <div class="input-group"><input id="galleryCaption" placeholder="Caption (optional)"></div>
       <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-cloud-upload-alt"></i> <span>Upload to Cloud</span></button>
@@ -323,7 +327,7 @@
 
 <script>
 // ============================================================
-// SUPABASE CONFIG - REPLACE WITH YOUR NEW KEYS!
+// SUPABASE CONFIG - YOUR CORRECT KEYS
 // ============================================================
 const SUPABASE_URL = "https://mitnarpkvezivdqjqmwh.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pdG5hcnBrdmV6aXZkcWpxbXdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzc4NzIsImV4cCI6MjA5ODY1Mzg3Mn0.qDU8vfq62OKDVpt8WBElYU4BA6esMnaTPgSGBRQgGDA";
@@ -357,17 +361,11 @@ let useSupabase = false;
 
 // Initialize Supabase
 try {
-  if (SUPABASE_URL.includes("YOUR_PROJECT")) {
-    console.warn('⚠️ Please replace SUPABASE_URL and SUPABASE_ANON_KEY with your actual Supabase keys!');
-    document.getElementById('syncText').textContent = 'Setup Required';
-    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
-  } else {
-    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    useSupabase = true;
-    console.log('✅ Supabase connected');
-    document.getElementById('syncText').textContent = 'Cloud Connected';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
-  }
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  useSupabase = true;
+  console.log('✅ Supabase connected');
+  document.getElementById('syncText').textContent = 'Cloud Connected';
+  document.getElementById('syncStatus').className = 'sync-status supabase-connected';
 } catch(e) {
   console.warn('⚠️ Supabase not available:', e.message);
   document.getElementById('syncText').textContent = 'Local Mode (Offline)';
@@ -785,6 +783,10 @@ async function uploadGalleryMedia() {
   var caption = document.getElementById("galleryCaption").value;
   var file = fileInput.files[0];
   
+  // Clear previous messages
+  document.getElementById('uploadStatus').style.display = 'none';
+  document.getElementById('uploadError').style.display = 'none';
+  
   if (!file) { 
     alert("📁 Please select an image or video file"); 
     return; 
@@ -805,48 +807,80 @@ async function uploadGalleryMedia() {
   try {
     const fileExt = file.name.split('.').pop() || 'jpg';
     const fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 10) + '.' + fileExt;
-    const filePath = 'public/' + fileName;
+    const filePath = fileName;
     
-    const { error: uploadError } = await supabaseClient
+    console.log('📤 Uploading to Supabase Storage:', filePath);
+    
+    const { data: uploadData, error: uploadError } = await supabaseClient
       .storage
       .from('gallery')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
     
-    if (uploadError) throw new Error(uploadError.message);
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(uploadError.message);
+    }
+    
+    console.log('✅ Upload successful:', uploadData);
     
     const { data: urlData } = supabaseClient
       .storage
       .from('gallery')
       .getPublicUrl(filePath);
     
+    const publicUrl = urlData.publicUrl;
+    console.log('🔗 Public URL:', publicUrl);
+    
     appData.gallery.push({
       id: Date.now().toString(),
       type: type,
-      data: urlData.publicUrl,
+      data: publicUrl,
       caption: caption || "",
       uploadedAt: new Date().toISOString(),
       isCloud: true
     });
     
     saveData();
+    
     document.getElementById("galleryMediaInput").value = "";
     document.getElementById("galleryCaption").value = "";
     
     uploadBtn.innerHTML = originalText;
     uploadBtn.disabled = false;
+    
+    // Show success message
+    var statusEl = document.getElementById('uploadStatus');
+    statusEl.innerHTML = '✅ Uploaded successfully! <a href="' + publicUrl + '" target="_blank">View file</a>';
+    statusEl.style.display = 'block';
+    
     renderAll();
     alert("✅ Uploaded to cloud!\n\n📱 Now visible on ALL devices!");
     
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('❌ Upload error:', error);
     uploadBtn.innerHTML = originalText;
     uploadBtn.disabled = false;
-    alert("❌ Upload failed: " + error.message);
+    
+    // Show error message
+    var errorEl = document.getElementById('uploadError');
+    errorEl.innerHTML = '❌ Upload failed: ' + error.message;
+    errorEl.style.display = 'block';
+    
+    if (error.message.includes('bucket')) {
+      alert("❌ Storage bucket 'gallery' not found!\n\nPlease create it in Supabase.");
+    } else if (error.message.includes('permission')) {
+      alert("❌ Permission denied! Please add storage policy.");
+    } else {
+      alert("❌ Upload failed: " + error.message);
+    }
   }
 }
 
 // ============================================================
-// RENDER FUNCTIONS (Simplified)
+// RENDER FUNCTIONS
 // ============================================================
 function renderAll() {
   renderAdminAllVisits();
@@ -865,68 +899,6 @@ function renderAll() {
   populateVolunteerDropdowns();
 }
 
-// ============================================================
-// DATA MANAGEMENT
-// ============================================================
-function loadData() {
-  try {
-    var saved = localStorage.getItem("electionAppV4");
-    if (saved) {
-      var savedData = JSON.parse(saved);
-      savedData.config = appData.config;
-      if (!savedData.teamMessages) savedData.teamMessages = [];
-      if (!savedData.gallery) savedData.gallery = [];
-      for(var i=0; i<savedData.volunteers.length; i++) {
-        if (!savedData.volunteers[i].status) savedData.volunteers[i].status = "pending";
-      }
-      appData = savedData;
-    }
-  } catch(error) {
-    console.log(error);
-    localStorage.removeItem("electionAppV4");
-  }
-  applyConfig();
-  renderAll();
-  populateFilters();
-  populateVolunteerDropdowns();
-}
-
-function saveData() {
-  localStorage.setItem("electionAppV4", JSON.stringify(appData));
-  renderAll();
-  updateAdminUI();
-  populateFilters();
-  populateVolunteerDropdowns();
-}
-
-function applyConfig() {
-  var photo = document.getElementById("candidatePhoto");
-  var waLink = document.getElementById("waLink");
-  var floatBtn = document.getElementById("whatsappFloatBtn");
-  if (photo) photo.src = appData.config.photo;
-  if (waLink) waLink.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
-  if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
-}
-
-// ============================================================
-// NAVIGATION
-// ============================================================
-function goToPage(pageId) {
-  if (isAdmin) return;
-  var pages = document.querySelectorAll('.page');
-  for(var i=0; i<pages.length; i++) pages[i].classList.remove('active');
-  var selected = document.getElementById(pageId);
-  if (selected) selected.classList.add('active');
-  var navs = document.querySelectorAll('.nav-item');
-  for(var j=0; j<navs.length; j++) {
-    navs[j].classList.remove('active');
-    if (navs[j].getAttribute('data-page') === pageId) navs[j].classList.add('active');
-  }
-}
-
-// ============================================================
-// RENDER FUNCTIONS - (Simplified versions)
-// ============================================================
 function renderAdminAllVisits() {
   var cont = document.getElementById("adminAllVisits");
   if (!cont) return;
@@ -1248,6 +1220,59 @@ function updateAdminStats() {
   var percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
   document.getElementById("adminCoverageFill").style.width = percent + "%";
   document.getElementById("adminCoverageText").innerHTML = currentText.coverage + ': ' + percent.toFixed(1) + '% (' + covered + '/' + total + ')';
+}
+
+function loadData() {
+  try {
+    var saved = localStorage.getItem("electionAppV4");
+    if (saved) {
+      var savedData = JSON.parse(saved);
+      savedData.config = appData.config;
+      if (!savedData.teamMessages) savedData.teamMessages = [];
+      if (!savedData.gallery) savedData.gallery = [];
+      for(var i=0; i<savedData.volunteers.length; i++) {
+        if (!savedData.volunteers[i].status) savedData.volunteers[i].status = "pending";
+      }
+      appData = savedData;
+    }
+  } catch(error) {
+    console.log(error);
+    localStorage.removeItem("electionAppV4");
+  }
+  applyConfig();
+  renderAll();
+  populateFilters();
+  populateVolunteerDropdowns();
+}
+
+function saveData() {
+  localStorage.setItem("electionAppV4", JSON.stringify(appData));
+  renderAll();
+  updateAdminUI();
+  populateFilters();
+  populateVolunteerDropdowns();
+}
+
+function applyConfig() {
+  var photo = document.getElementById("candidatePhoto");
+  var waLink = document.getElementById("waLink");
+  var floatBtn = document.getElementById("whatsappFloatBtn");
+  if (photo) photo.src = appData.config.photo;
+  if (waLink) waLink.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
+  if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
+}
+
+function goToPage(pageId) {
+  if (isAdmin) return;
+  var pages = document.querySelectorAll('.page');
+  for(var i=0; i<pages.length; i++) pages[i].classList.remove('active');
+  var selected = document.getElementById(pageId);
+  if (selected) selected.classList.add('active');
+  var navs = document.querySelectorAll('.nav-item');
+  for(var j=0; j<navs.length; j++) {
+    navs[j].classList.remove('active');
+    if (navs[j].getAttribute('data-page') === pageId) navs[j].classList.add('active');
+  }
 }
 
 // ============================================================
