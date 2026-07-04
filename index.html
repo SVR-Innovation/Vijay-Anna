@@ -9,6 +9,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-storage-compat.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{--primary:#0f2b3d;--primary-light:#1a4a6a;--accent:#e85d3a;--accent-light:#f07a5a;--success:#10b981;--warning:#f59e0b;--gray:#f1f5f9;--dark:#0a1a2a;--glass:rgba(255,255,255,0.12);}
@@ -99,8 +100,8 @@
     .sync-status{font-size:11px;color:#94a3b8;text-align:center;padding:4px;display:flex;align-items:center;justify-content:center;gap:6px;}
     .sync-status .fa-spinner{animation:spin 1s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .supabase-connected{color:#10b981;}
-    .supabase-disconnected{color:#ef4444;}
+    .firebase-connected{color:#10b981;}
+    .firebase-disconnected{color:#ef4444;}
     .badge-premium{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:2px 12px;border-radius:30px;font-size:9px;}
     .empty-state{text-align:center;padding:20px 10px;color:#94a3b8;}
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
@@ -345,25 +346,26 @@ const firebaseConfig = {
 // Initialize Firebase
 let db = null;
 let useFirebase = false;
+let isLoadingFromFirestore = false;
 
 try {
   if (firebaseConfig.apiKey.includes("YOUR_API_KEY")) {
     console.warn('⚠️ Please replace Firebase config with your actual keys!');
     useFirebase = false;
     document.getElementById('syncText').textContent = 'Setup Required';
-    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+    document.getElementById('syncStatus').className = 'sync-status firebase-disconnected';
   } else {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     useFirebase = true;
     console.log('✅ Firebase connected');
     document.getElementById('syncText').textContent = 'Firestore Connected';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    document.getElementById('syncStatus').className = 'sync-status firebase-connected';
   }
 } catch(e) {
   console.warn('⚠️ Firebase not available:', e.message);
   document.getElementById('syncText').textContent = 'Local Mode (Offline)';
-  document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+  document.getElementById('syncStatus').className = 'sync-status firebase-disconnected';
   useFirebase = false;
 }
 
@@ -1403,8 +1405,7 @@ function renderAll() {
 
 // Save data to Firestore
 function saveData() {
-  // First save locally
-  // Then sync to Firestore if available
+  // Save to Firestore
   if (useFirebase && db) {
     syncToFirestore();
   }
@@ -1414,35 +1415,47 @@ function saveData() {
   populateVolunteerDropdowns();
 }
 
-// Sync all collections to Firestore
+// Sync all collections to Firestore - FIXED VERSION
 async function syncToFirestore() {
-  if (!useFirebase || !db) return;
+  if (!useFirebase || !db) {
+    console.warn('Firebase not available');
+    return;
+  }
+  
+  // Don't sync while loading from Firestore to avoid loops
+  if (isLoadingFromFirestore) {
+    return;
+  }
   
   try {
-    const batch = db.batch();
-    const collections = [
-      { name: 'visits', data: appData.visits },
-      { name: 'issues', data: appData.issues },
-      { name: 'volunteers', data: appData.volunteers },
-      { name: 'dailyReports', data: appData.dailyReports },
-      { name: 'events', data: appData.events },
-      { name: 'teamMessages', data: appData.teamMessages }
-    ];
+    console.log('🔄 Syncing data to Firestore...');
     
-    for (const coll of collections) {
-      for (const item of coll.data) {
-        const docRef = db.collection(coll.name).doc(item.id || 'temp');
-        batch.set(docRef, item, { merge: true });
+    // Save each collection separately for better reliability
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages'];
+    
+    for (const collName of collections) {
+      const collectionRef = db.collection(collName);
+      const items = appData[collName] || [];
+      
+      for (const item of items) {
+        // Ensure each item has an ID
+        if (!item.id) {
+          item.id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Save to Firestore
+        await collectionRef.doc(item.id).set(item, { merge: true });
       }
     }
     
-    await batch.commit();
     document.getElementById('syncText').textContent = 'Synced ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    document.getElementById('syncStatus').className = 'sync-status firebase-connected';
+    console.log('✅ Data synced to Firestore successfully!');
+    
   } catch(err) {
-    console.warn('Firestore sync error:', err.message);
-    document.getElementById('syncText').textContent = 'Sync pending';
-    document.getElementById('syncStatus').className = 'sync-status supabase-disconnected';
+    console.error('Firestore sync error:', err.message);
+    document.getElementById('syncText').textContent = 'Sync error';
+    document.getElementById('syncStatus').className = 'sync-status firebase-disconnected';
   }
 }
 
@@ -1450,7 +1463,11 @@ async function syncToFirestore() {
 async function loadFromFirestore() {
   if (!useFirebase || !db) return;
   
+  isLoadingFromFirestore = true;
+  
   try {
+    console.log('🔄 Loading data from Firestore...');
+    
     const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'events', 'teamMessages'];
     
     for (const collName of collections) {
@@ -1460,7 +1477,6 @@ async function loadFromFirestore() {
         data.push({ id: doc.id, ...doc.data() });
       });
       
-      // Map collection name to appData key
       const keyMap = {
         'visits': 'visits',
         'issues': 'issues',
@@ -1471,7 +1487,6 @@ async function loadFromFirestore() {
       };
       
       if (keyMap[collName]) {
-        // Ensure volunteers have status field
         if (collName === 'volunteers') {
           appData[keyMap[collName]] = data.map(v => ({ ...v, status: v.status || 'pending' }));
         } else {
@@ -1487,9 +1502,12 @@ async function loadFromFirestore() {
     populateAdminTeamDropdown();
     
     document.getElementById('syncText').textContent = 'Cloud Loaded ✓';
-    document.getElementById('syncStatus').className = 'sync-status supabase-connected';
+    document.getElementById('syncStatus').className = 'sync-status firebase-connected';
+    console.log('✅ Data loaded from Firestore!');
   } catch(err) {
     console.warn('Load from Firestore error:', err.message);
+  } finally {
+    isLoadingFromFirestore = false;
   }
 }
 
