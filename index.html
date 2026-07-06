@@ -115,11 +115,14 @@
     .empty-state i{font-size:36px;margin-bottom:10px;display:block;opacity:0.4;}
     .install-banner{background:#0f2b3d;color:white;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:10px;}
     .install-banner button{background:#e85d3a;border:none;color:white;padding:6px 16px;border-radius:30px;font-weight:600;cursor:pointer;}
-    /* Larger Header Elements */
     .header-sub-text{font-size:16px;opacity:0.9;margin-top:4px;font-weight:500;}
     .header-admin-status{font-size:13px;background:var(--glass);padding:5px 18px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);display:inline-block;}
     .header-admin-btn{font-size:13px;padding:5px 18px;}
     .header-dev-badge{font-size:14px;background:var(--glass);padding:6px 20px;border-radius:30px;margin-top:5px;display:inline-block;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08);font-weight:500;}
+    .upcoming-event-card{background:#fef9e7;border-left:5px solid var(--accent);padding:12px 14px;margin-bottom:10px;border-radius:12px;}
+    .upcoming-event-card .event-title{font-weight:700;color:var(--dark);}
+    .upcoming-event-card .event-date{color:#64748b;font-size:12px;display:block;margin-top:4px;}
+    .upcoming-event-card .event-desc{font-size:14px;margin-top:4px;color:#334155;}
   </style>
 </head>
 <body>
@@ -127,7 +130,6 @@
   <!-- Login Overlay with Close Button -->
   <div id="loginOverlay" class="login-overlay hidden">
     <div class="login-box">
-      <!-- Close Button (X) -->
       <button type="button" id="loginCloseBtn" class="login-close-btn" title="Close"><i class="fas fa-times"></i></button>
       <h2 style="text-align:center;">🔐 Admin Login</h2>
       <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:16px;">Enter admin credentials</p>
@@ -138,7 +140,7 @@
   </div>
 
   <div class="app-header">
-    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:16px;font-weight:400;">Developed by SVR Innovation</span></h1>
+    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:16px;font-weight:400;">Developed SVR Innovation</span></h1>
     <div class="header-dev-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
     <p class="header-sub-text" id="headerSub">Corporator Election Campaign</p>
     <div style="display:flex;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -155,7 +157,6 @@
 
   <!-- PAGE 1: HOME -->
   <div id="page-home" class="page active">
-    <!-- PWA Install Banner -->
     <div id="installBanner" class="install-banner hidden">
       <span><i class="fas fa-download"></i> Install App</span>
       <button id="installBtn">Install</button>
@@ -173,6 +174,13 @@
         <button type="button" class="btn-outline" style="flex:1;padding:10px;" onclick="goToPage('page-issue')"><i class="fas fa-exclamation-triangle"></i> <span id="issueBtnText">Report Issue</span></button>
       </div>
     </div>
+
+    <!-- UPCOMING EVENTS SECTION (Home) -->
+    <div class="card" id="upcomingEventsHome">
+      <h3 id="upcomingEventsTitle">📅 Upcoming Events</h3>
+      <div id="upcomingEventsList"></div>
+    </div>
+
     <div class="card"><h3 id="promisesTitle">🎯 Key Promises</h3>
       <ul style="margin-left:20px;list-style:none;padding:0;" id="promisesList">
         <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ 24x7 Clean Water Supply</li>
@@ -183,7 +191,14 @@
     </div>
   </div>
 
-  <!-- PAGE 2: DOOR TO DOOR -->
+  <!-- PAGE 2: GALLERY (moved after home) -->
+  <div id="page-gallery" class="page">
+    <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery</h3>
+      <div id="publicGalleryEvents"></div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: DOOR TO DOOR -->
   <div id="page-doortodoor" class="page">
     <div class="card"><h3 id="d2dTitle">🏠 House Visit Entry</h3>
       <div class="input-group"><input id="houseNo" placeholder="House Number / Name"></div>
@@ -201,10 +216,10 @@
       </div>
       <button type="button" id="saveVisitBtn" class="btn"><i class="fas fa-save"></i> <span id="saveText">Save Visit</span></button>
     </div>
-    <button type="button" id="exportVisitsBtn" class="btn-outline" style="margin-top:8px;"><i class="fas fa-download"></i> <span id="exportText">Export CSV</span></button>
+    <!-- EXPORT CSV BUTTON REMOVED as requested -->
   </div>
 
-  <!-- PAGE 3: ISSUES -->
+  <!-- PAGE 4: ISSUES -->
   <div id="page-issue" class="page">
     <div class="card"><h3 id="issueFormTitle">⚠️ Public Issue Registration</h3>
       <div class="input-group"><input id="issuePersonName" placeholder="Your Name"></div>
@@ -220,7 +235,7 @@
     </div>
   </div>
 
-  <!-- PAGE 4: VOLUNTEERS -->
+  <!-- PAGE 5: VOLUNTEERS -->
   <div id="page-volunteer" class="page">
     <div class="card"><h3 id="volRegTitle">🤝 Volunteer Registration</h3>
       <div class="input-group"><input id="volNameReg" placeholder="Full Name"></div>
@@ -236,13 +251,6 @@
       <button type="button" id="submitDailyReportBtn" class="btn-accent"><span id="submitReportText">Submit Report</span></button>
     </div>
     <div id="dailyReportsList"></div>
-  </div>
-
-  <!-- PAGE 5: GALLERY -->
-  <div id="page-gallery" class="page">
-    <div class="card"><h3 id="galleryPublicTitle">🖼️ Gallery</h3>
-      <div id="publicGalleryEvents"></div>
-    </div>
   </div>
 
   <!-- ADMIN PAGE -->
@@ -264,6 +272,15 @@
       <div class="input-group"><input id="adminVolMobile" placeholder="Mobile Number"></div>
       <div class="input-group"><input id="adminVolArea" placeholder="Area / Booth"></div>
       <button type="button" id="adminAddVolunteerBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> <span id="adminAddVolText">Add Team Member</span></button>
+    </div>
+
+    <div class="card">
+      <h3>📅 Manage Upcoming Events <span class="admin-badge">Admin</span></h3>
+      <div class="input-group"><input id="adminEventTitle" placeholder="Event Title"></div>
+      <div class="input-group"><input id="adminEventDate" type="date"></div>
+      <div class="input-group"><textarea id="adminEventDesc" rows="2" placeholder="Event Description"></textarea></div>
+      <button type="button" id="adminAddEventBtn" class="btn btn-accent"><i class="fas fa-calendar-plus"></i> Add Event</button>
+      <div id="adminEventList" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -320,13 +337,13 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation (Updated order: Home, Gallery, Door to Door, Issues, Volunteers) -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
+    <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
     <div class="nav-item" data-page="page-doortodoor"><i class="fas fa-door-open"></i><span id="navD2D">Door to Door</span></div>
     <div class="nav-item" data-page="page-issue"><i class="fas fa-exclamation-triangle"></i><span id="navIssues">Issues</span></div>
     <div class="nav-item" data-page="page-volunteer"><i class="fas fa-users"></i><span id="navVol">Volunteers</span></div>
-    <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
   </div>
   <div class="footer-text">📢 Campaign Team - Data Synced with Firebase Firestore</div>
 </div>
@@ -412,7 +429,7 @@ var TE = {
   promises: "🎯 ప్రధాన వాగ్దానాలు",
   promisesList: ["✅ 24x7 స్వచ్ఛమైన నీటి సరఫరా", "✅ గుంతలు లేని రోడ్లు", "✅ ఇంటింటికీ చెత్త సేకరణ", "✅ మహిళా భద్రత - సీసీ కెమెరాలు"],
   total: "మొత్తం ఇళ్లు", covered: "కవర్ అయినవి", follow: "ఫాలోఅప్", issuesLabel: "సమస్యలు",
-  d2d: "🏠 ఇంటి వివరాలు నమోదు", save: "సేవ్ చేయండి", export: "CSV ఎగుమతి",
+  d2d: "🏠 ఇంటి వివరాలు నమోదు", save: "సేవ్ చేయండి", 
   housePlace: "ఇంటి నంబర్ / పేరు", familyPlace: "కుటుంబ పేరు", mobilePlace: "మొబైల్ నంబర్", volPlace: "వాలంటీయర్ ఎంచుకోండి",
   issueForm: "⚠️ ప్రజల సమస్య నమోదు", submit: "సమస్య నమోదు చేయండి",
   namePlace: "మీ పేరు", mobilePlace2: "మొబైల్", areaPlace: "కాలనీ / వార్డు", descPlace: "సమస్య వివరాలు",
@@ -435,7 +452,8 @@ var TE = {
   allVols: "అందరు వాలంటీర్లు", reportBy: "రిపోర్ట్ వారీగా",
   sendMsg: "WhatsApp సందేశం పంపు", selectMember: "టీమ్ సభ్యుడిని ఎంచుకోండి", msgSent: "సందేశం పంపబడింది",
   noTeamMessages: "ఇంకా టీమ్ సందేశాలు లేవు", teamMsgHistory: "టీమ్ సందేశాల చరిత్ర",
-  addTeamMember: "టీమ్ సభ్యుడిని జోడించు", allMembers: "అందరికీ పంపు"
+  addTeamMember: "టీమ్ సభ్యుడిని జోడించు", allMembers: "అందరికీ పంపు",
+  upcomingEvents: "📅 రాబోయే ఈవెంట్లు", noUpcomingEvents: "రాబోయే ఈవెంట్లు లేవు", addEvent: "ఈవెంట్ జోడించు", eventTitle: "ఈవెంట్ టైటిల్", eventDate: "తేదీ", eventDesc: "వివరణ"
 };
 
 var EN = {
@@ -444,7 +462,7 @@ var EN = {
   promises: "🎯 Key Promises",
   promisesList: ["✅ 24x7 Clean Water Supply", "✅ Pothole-free Roads", "✅ Door-to-door Garbage Collection", "✅ Women Safety - CCTV Cameras"],
   total: "Total Houses", covered: "Covered", follow: "Follow-up", issuesLabel: "Issues",
-  d2d: "🏠 House Visit Entry", save: "Save Visit", export: "Export CSV",
+  d2d: "🏠 House Visit Entry", save: "Save Visit",
   housePlace: "House Number / Name", familyPlace: "Family Name", mobilePlace: "Mobile Number", volPlace: "Select Volunteer",
   issueForm: "⚠️ Public Issue Registration", submit: "Submit Issue",
   namePlace: "Your Name", mobilePlace2: "Mobile Number", areaPlace: "Colony / Ward", descPlace: "Issue Description",
@@ -467,7 +485,8 @@ var EN = {
   allVols: "All Volunteers", reportBy: "Report by",
   sendMsg: "Send WhatsApp Message", selectMember: "Select Team Member", msgSent: "Message sent successfully!",
   noTeamMessages: "No team messages sent yet", teamMsgHistory: "Team Message History",
-  addTeamMember: "Add Team Member", allMembers: "Send to ALL Members"
+  addTeamMember: "Add Team Member", allMembers: "Send to ALL Members",
+  upcomingEvents: "📅 Upcoming Events", noUpcomingEvents: "No upcoming events", addEvent: "Add Event", eventTitle: "Event Title", eventDate: "Date", eventDesc: "Description"
 };
 
 // ======================= LANGUAGE =======================
@@ -488,7 +507,6 @@ function setLanguage(lang) {
     adminIssuesLabel: document.getElementById("adminIssuesLabel"),
     d2dTitle: document.getElementById("d2dTitle"),
     saveText: document.getElementById("saveText"),
-    exportText: document.getElementById("exportText"),
     houseNo: document.getElementById("houseNo"),
     familyName: document.getElementById("familyName"),
     mobileD2D: document.getElementById("mobileD2D"),
@@ -517,7 +535,9 @@ function setLanguage(lang) {
     adminAddVolText: document.getElementById("adminAddVolText"),
     adminSendMsgText: document.getElementById("adminSendMsgText"),
     candidateName: document.getElementById("candidateName"),
-    slogan: document.getElementById("slogan")
+    slogan: document.getElementById("slogan"),
+    upcomingEventsTitle: document.getElementById("upcomingEventsTitle"),
+    galleryPublicTitle: document.getElementById("galleryPublicTitle")
   };
   
   if (elements.headerSub) elements.headerSub.innerText = currentText.headerSub;
@@ -532,7 +552,6 @@ function setLanguage(lang) {
   if (elements.adminIssuesLabel) elements.adminIssuesLabel.innerText = currentText.issuesLabel;
   if (elements.d2dTitle) elements.d2dTitle.innerHTML = currentText.d2d;
   if (elements.saveText) elements.saveText.innerText = currentText.save;
-  if (elements.exportText) elements.exportText.innerText = currentText.export;
   if (elements.houseNo) elements.houseNo.placeholder = currentText.housePlace;
   if (elements.familyName) elements.familyName.placeholder = currentText.familyPlace;
   if (elements.mobileD2D) elements.mobileD2D.placeholder = currentText.mobilePlace;
@@ -560,6 +579,8 @@ function setLanguage(lang) {
   if (elements.navGallery) elements.navGallery.innerText = currentText.navGallery;
   if (elements.adminAddVolText) elements.adminAddVolText.innerText = currentText.addTeamMember;
   if (elements.adminSendMsgText) elements.adminSendMsgText.innerText = currentText.sendMsg;
+  if (elements.upcomingEventsTitle) elements.upcomingEventsTitle.innerText = currentText.upcomingEvents;
+  if (elements.galleryPublicTitle) elements.galleryPublicTitle.innerText = currentText.gallery;
   
   var promisesUl = document.getElementById("promisesList");
   if (promisesUl) {
@@ -591,7 +612,6 @@ function setLanguage(lang) {
 function loginAdmin() {
   var user = document.getElementById("adminUser").value;
   var pass = document.getElementById("adminPass").value;
-  // No default credentials - user must type manually
   if (user === "admin" && pass === "admin123") {
     isAdmin = true;
     var overlay = document.getElementById("loginOverlay");
@@ -651,7 +671,6 @@ function toggleAdminLogin() {
   } else {
     var overlay = document.getElementById("loginOverlay");
     if (overlay) overlay.classList.remove("hidden");
-    // Clear fields so admin has to type manually each time
     document.getElementById("adminUser").value = "";
     document.getElementById("adminPass").value = "";
   }
@@ -659,7 +678,6 @@ function toggleAdminLogin() {
 
 function closeLoginPopup() {
   document.getElementById("loginOverlay").classList.add("hidden");
-  // Clear fields
   document.getElementById("adminUser").value = "";
   document.getElementById("adminPass").value = "";
 }
@@ -873,6 +891,93 @@ function adminAddTeamMember() {
   populateAdminTeamDropdown();
 }
 
+// ======================= UPCOMING EVENTS =======================
+function adminAddEvent() {
+  var title = document.getElementById("adminEventTitle").value.trim();
+  var date = document.getElementById("adminEventDate").value;
+  var desc = document.getElementById("adminEventDesc").value.trim();
+
+  if (!title || !date) {
+    alert("Please fill Event Title and Date");
+    return;
+  }
+
+  var newEvent = {
+    id: Date.now().toString(),
+    title: title,
+    date: date,
+    desc: desc || ""
+  };
+
+  appData.events.push(newEvent);
+  if (useFirebase && db) {
+    db.collection('events').doc(newEvent.id).set(newEvent, { merge: true })
+      .then(function() { console.log('✅ Event saved to Firestore'); })
+      .catch(function(error) { console.error('Save error:', error); });
+  }
+
+  document.getElementById("adminEventTitle").value = "";
+  document.getElementById("adminEventDate").value = "";
+  document.getElementById("adminEventDesc").value = "";
+  renderAll();
+  alert("✅ Event added!");
+}
+
+function deleteEvent(id) {
+  if (confirm(currentText.confirmDelete)) {
+    appData.events = appData.events.filter(function(e) { return e.id !== id; });
+    if (useFirebase && db) {
+      db.collection('events').doc(id).delete()
+        .then(function() { console.log('✅ Event deleted from Firestore'); renderAll(); })
+        .catch(function(error) { console.error('Delete error:', error); saveData(); renderAll(); });
+    } else { saveData(); renderAll(); }
+  }
+}
+
+function renderUpcomingEvents() {
+  var cont = document.getElementById("upcomingEventsList");
+  if (!cont) return;
+  
+  // Sort events by date (nearest first)
+  var sorted = [...appData.events].sort(function(a, b) {
+    return new Date(a.date) - new Date(b.date);
+  });
+
+  if (sorted.length === 0) {
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i>'+currentText.noUpcomingEvents+'</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i=0; i<sorted.length; i++) {
+    var e = sorted[i];
+    var dateObj = new Date(e.date);
+    var dateStr = dateObj.toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    html += '<div class="upcoming-event-card"><div class="event-title">📌 '+e.title+'</div><span class="event-date">📅 '+dateStr+'</span><div class="event-desc">'+e.desc+'</div></div>';
+  }
+  cont.innerHTML = html;
+}
+
+function renderAdminEventList() {
+  var cont = document.getElementById("adminEventList");
+  if (!cont) return;
+  if (appData.events.length === 0) {
+    cont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-plus"></i> No events added</div>';
+    return;
+  }
+  var sorted = [...appData.events].sort(function(a, b) {
+    return new Date(a.date) - new Date(b.date);
+  });
+  var html = '';
+  for (var i=0; i<sorted.length; i++) {
+    var e = sorted[i];
+    var dateObj = new Date(e.date);
+    var dateStr = dateObj.toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    html += '<div class="event-card" style="display:flex;justify-content:space-between;align-items:center;"><div><strong>'+e.title+'</strong><br><span style="font-size:12px;color:#64748b;">'+dateStr+'</span><div style="font-size:13px;">'+e.desc+'</div></div><button class="btn btn-danger btn-sm" onclick="deleteEvent(\''+e.id+'\')">🗑️</button></div>';
+  }
+  cont.innerHTML = html;
+}
+
 // ======================= RENDER FUNCTIONS =======================
 function renderAdminAllVisits() {
   var cont = document.getElementById("adminAllVisits");
@@ -889,7 +994,6 @@ function renderAdminAllVisits() {
   cont.innerHTML = html;
 }
 
-// ======================= DELETION FUNCTIONS WITH FIRESTORE =======================
 function deleteVisit(id) {
   if (confirm(currentText.confirmDelete)) {
     appData.visits = appData.visits.filter(function(v) { return v.id !== id; });
@@ -967,7 +1071,6 @@ function deleteTeamMessage(id) {
   }
 }
 
-// ======================= RENDER FUNCTIONS (continued) =======================
 function renderAdminAllReports() {
   var cont = document.getElementById("adminAllReports");
   if (!cont) return;
@@ -1371,6 +1474,8 @@ function renderDailyReports() {
 }
 
 function renderAll() {
+  renderUpcomingEvents();
+  renderAdminEventList();
   renderVisits();
   renderAdminAllVisits();
   renderAdminAllReports();
@@ -1406,7 +1511,7 @@ async function syncToFirestore() {
   
   try {
     console.log('🔄 Syncing data to Firestore...');
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages', 'events'];
     
     for (const collName of collections) {
       const collectionRef = db.collection(collName);
@@ -1437,7 +1542,7 @@ async function loadFromFirestore() {
   
   try {
     console.log('🔄 Loading data from Firestore...');
-    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
+    const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages', 'events'];
     
     for (const collName of collections) {
       const snapshot = await db.collection(collName).get();
@@ -1452,7 +1557,8 @@ async function loadFromFirestore() {
         'volunteers': 'volunteers',
         'dailyReports': 'dailyReports',
         'gallery': 'gallery',
-        'teamMessages': 'teamMessages'
+        'teamMessages': 'teamMessages',
+        'events': 'events'
       };
       
       if (keyMap[collName]) {
@@ -1479,12 +1585,10 @@ async function loadFromFirestore() {
   }
 }
 
-// ======================= REAL-TIME LISTENERS =======================
-
 function setupRealtimeListeners() {
   if (!useFirebase || !db) return;
   
-  const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages'];
+  const collections = ['visits', 'issues', 'volunteers', 'dailyReports', 'gallery', 'teamMessages', 'events'];
   
   for (const collName of collections) {
     db.collection(collName).onSnapshot(function(snapshot) {
@@ -1555,7 +1659,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Close Login Popup with X button
   var loginCloseBtn = document.getElementById("loginCloseBtn");
   if (loginCloseBtn) {
     loginCloseBtn.addEventListener("click", function() {
@@ -1563,7 +1666,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Close Login Popup by clicking outside (on overlay)
   var loginOverlay = document.getElementById("loginOverlay");
   if (loginOverlay) {
     loginOverlay.addEventListener("click", function(e) {
@@ -1698,25 +1800,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Export CSV
-  var exportVisitsBtn = document.getElementById("exportVisitsBtn");
-  if (exportVisitsBtn) {
-    exportVisitsBtn.addEventListener("click", function() { 
-      if (isAdmin) return;
-      var csv = "House No,Family,Mobile,Status,Volunteer\n"; 
-      for(var i=0; i<appData.visits.length; i++) {
-        var v = appData.visits[i];
-        csv+='"'+v.houseNo+'","'+v.familyName+'","'+v.mobile+'","'+v.status+'","'+v.volunteer+'"\n';
-      }
-      var a=document.createElement("a"); 
-      a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); 
-      a.download="campaign_data.csv";  
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-  }
-
   // ADMIN: Add Team Member
   var adminAddVolunteerBtn = document.getElementById("adminAddVolunteerBtn");
   if (adminAddVolunteerBtn) {
@@ -1751,6 +1834,15 @@ document.addEventListener('DOMContentLoaded', function() {
           customMsg.value = getAdminMessageTemplate(val);
         }
       }
+    });
+  }
+
+  // ADMIN: Add Event
+  var adminAddEventBtn = document.getElementById("adminAddEventBtn");
+  if (adminAddEventBtn) {
+    adminAddEventBtn.addEventListener("click", function() {
+      if (!isAdmin) return;
+      adminAddEvent();
     });
   }
 
@@ -1811,6 +1903,7 @@ window.deleteGalleryItem = deleteGalleryItem;
 window.deleteIssue = deleteIssue;
 window.deleteAdminReport = deleteAdminReport;
 window.deleteVisit = deleteVisit;
+window.deleteEvent = deleteEvent;
 window.filterAdminReports = filterAdminReports;
 window.setLanguage = setLanguage;
 window.loginAdmin = loginAdmin;
@@ -1822,6 +1915,7 @@ window.adminAddTeamMember = adminAddTeamMember;
 window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.deleteTeamMessage = deleteTeamMessage;
+window.adminAddEvent = adminAddEvent;
 </script>
 </body>
 </html>
