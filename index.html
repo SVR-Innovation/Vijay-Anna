@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
+  <title>PrajaConnect | Election Pilot</title>
   <!-- SEO Meta -->
-  <meta name="description" content="Mana Vijay Anna Election Campaign - Corporator Election. Door to door, volunteer registration, issue reporting.">
+  <meta name="description" content="PrajaConnect - Election Campaign Management. Door to door, volunteer registration, issue reporting.">
   <meta name="theme-color" content="#0f2b3d">
   <link rel="manifest" href="manifest.json">
   <!-- PWA icons -->
@@ -58,7 +58,7 @@
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);display:flex;justify-content:space-around;padding:6px 0 10px;border-top:1px solid rgba(0,0,0,0.05);z-index:100;max-width:500px;margin:0 auto;}
     .nav-item{text-align:center;font-size:10px;color:#94a3b8;padding:4px 0;flex:1;cursor:pointer;transition:color 0.2s;border-radius:12px;padding:6px 0;}
     .nav-item i{font-size:22px;display:block;margin-bottom:1px;}
-    .nav-item.active{color:var(--accent);font-weight:600;background:rgba(232,93,58,0.08);}
+    .nav-item.active{color:white;font-weight:600;background:#1a4a6a;box-shadow:0 2px 8px rgba(26,74,106,0.3);}
     .nav-item:hover{color:var(--primary);}
     .whatsapp-float{position:fixed;bottom:75px;right:16px;background:#25D366;color:white;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;z-index:99;box-shadow:0 4px 16px rgba(37,211,102,0.35);text-decoration:none;border:2px solid white;transition:transform 0.2s;}
     .whatsapp-float:hover{transform:scale(1.05);}
@@ -145,7 +145,7 @@
   </div>
 
   <div class="app-header">
-    <h1>🗳️ ELECTION PILOT <span>|</span> <span style="font-size:16px;font-weight:400;">Developed SVR Innovation</span></h1>
+    <h1>🗳️ PrajaConnect <span>|</span> <span style="font-size:16px;font-weight:400;">Developed SVR Innovation</span></h1>
     <div class="header-dev-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
     <p class="header-sub-text" id="headerSub">Corporator Election Campaign</p>
     <div style="display:flex;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -341,7 +341,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation (Updated order: Home, Gallery, Door to Door, Issues, Volunteers) -->
+  <!-- Bottom Navigation (Dark mode tabs with blue shading) -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
     <div class="nav-item" data-page="page-gallery"><i class="fas fa-images"></i><span id="navGallery">Gallery</span></div>
@@ -780,7 +780,7 @@ function adminSendTeamWhatsApp() {
       sentCount++;
       
       if (i === 0) {
-        var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+        var url = 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(message);
         window.open(url, '_blank');
       }
     }
@@ -840,7 +840,7 @@ function adminSendTeamWhatsApp() {
   });
   saveData();
   
-  var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+  var url = 'https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(message);
   window.open(url, '_blank');
   
   if (statusDiv) {
@@ -1099,7 +1099,7 @@ function renderAdminIssues() {
   var html = '';
   for(var i=appData.issues.length-1; i>=0; i--) {
     var issue = appData.issues[i];
-    html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#'+(i+1)+' - '+issue.category+'</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\''+issue.id+'\')">🗑️ '+currentText.delete+'</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>'+currentText.name+':</strong> '+issue.name+'</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>'+currentText.mobile+':</strong> '+(issue.mobile || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>'+currentText.area+':</strong> '+(issue.area || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>'+currentText.category+':</strong> '+issue.category+'</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>'+currentText.description+':</strong> '+issue.desc+'</div></div>';
+    html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#'+(i+1)+' - '+issue.category+'</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\''+issue.id+'\')">🗑️ '+currentText.delete+'</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>Name:</strong> '+issue.name+'</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>Mobile:</strong> '+(issue.mobile || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>Area:</strong> '+(issue.area || 'N/A')+'</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>Category:</strong> '+issue.category+'</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>Description:</strong> '+issue.desc+'</div></div>';
   }
   cont.innerHTML = html;
 }
@@ -1811,9 +1811,18 @@ function applyConfig() {
   var photo = document.getElementById("candidatePhoto");
   var waLink = document.getElementById("waLink");
   var floatBtn = document.getElementById("whatsappFloatBtn");
+  var whatsappNumber = "9396806527";
   if (photo) photo.src = appData.config.photo;
-  if (waLink) waLink.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
-  if (floatBtn) floatBtn.href = "https://wa.me/" + appData.config.whatsapp.replace("+","");
+  if (waLink) waLink.href = "https://api.whatsapp.com/send?phone=91" + whatsappNumber;
+  if (floatBtn) floatBtn.href = "https://api.whatsapp.com/send?phone=91" + whatsappNumber;
+  // Also update the click handlers for any WhatsApp buttons
+  var allWhatsAppBtns = document.querySelectorAll('.btn-whatsapp, .btn-accent .fab.fa-whatsapp, .whatsapp-float');
+  for(var i=0; i<allWhatsAppBtns.length; i++) {
+    var btn = allWhatsAppBtns[i];
+    if (btn.tagName === 'A') {
+      btn.href = "https://api.whatsapp.com/send?phone=91" + whatsappNumber;
+    }
+  }
 }
 
 function goToPage(pageId) {
@@ -2099,6 +2108,9 @@ document.addEventListener('DOMContentLoaded', function() {
       syncToFirestore();
     }, 30000);
   }
+  
+  // Apply WhatsApp config after DOM load
+  applyConfig();
 });
 
 window.goToPage = goToPage;
