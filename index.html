@@ -128,6 +128,11 @@
     #uploadProgressContainer .progress-bar-bg{width:100%;height:6px;background:#e8edf2;border-radius:10px;overflow:hidden;}
     #uploadProgressContainer .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#e85d3a,#f07a5a);border-radius:10px;transition:width 0.3s;}
     #uploadProgressContainer .progress-status{font-size:11px;color:#94a3b8;margin-top:4px;}
+    .admin-module-btn{display:block;width:100%;padding:12px 16px;margin:6px 0;background:var(--primary-light);color:white;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:left;}
+    .admin-module-btn:hover{background:var(--primary);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+    .admin-module-btn i{margin-right:10px;width:20px;}
+    .admin-module-content{display:none;margin-top:10px;}
+    .admin-module-content.active{display:block;}
   </style>
 </head>
 <body>
@@ -147,7 +152,7 @@
   <div class="app-header">
     <h1>🗳️ PrajaConnect <span>|</span> <span style="font-size:16px;font-weight:400;">Developed SVR Innovation</span></h1>
     <div class="header-dev-badge"><i class="fas fa-phone-alt"></i> Cell: 8500172644</div>
-    <p class="header-sub-text" id="headerSub">Corporator Election Campaign</p>
+    <p class="header-sub-text" id="headerSub">People's Development is Our Goal</p>
     <div style="display:flex;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
       <span id="adminStatus" class="header-admin-status">👤 Public</span>
       <button type="button" id="adminToggleBtn" class="lang-btn header-admin-btn" style="font-size:13px;padding:5px 18px;">🔑 Admin</button>
@@ -186,13 +191,9 @@
       <div id="upcomingEventsList"></div>
     </div>
 
-    <div class="card"><h3 id="promisesTitle">🎯 Key Promises</h3>
-      <ul style="margin-left:20px;list-style:none;padding:0;" id="promisesList">
-        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ 24x7 Clean Water Supply</li>
-        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ Pothole-free Roads</li>
-        <li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ Door-to-door Garbage Collection</li>
-        <li style="padding:6px 0;">✅ Women Safety - CCTV Cameras</li>
-      </ul>
+    <div class="card">
+      <h3 id="promisesTitle">🎯 Key Promises</h3>
+      <ul style="margin-left:20px;list-style:none;padding:0;" id="promisesList"></ul>
     </div>
   </div>
 
@@ -270,74 +271,99 @@
       <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText" style="font-size:13px;color:#64748b;">Campaign Progress: 0%</p></div>
     </div>
 
+    <!-- Admin Module Buttons -->
     <div class="card">
-      <h3>👥 Register Team Member <span class="admin-badge">Admin</span></h3>
-      <div class="input-group"><input id="adminVolName" placeholder="Full Name"></div>
-      <div class="input-group"><input id="adminVolMobile" placeholder="Mobile Number"></div>
-      <div class="input-group"><input id="adminVolArea" placeholder="Area / Booth"></div>
-      <button type="button" id="adminAddVolunteerBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> <span id="adminAddVolText">Add Team Member</span></button>
-    </div>
-
-    <div class="card">
-      <h3>📅 Manage Upcoming Events <span class="admin-badge">Admin</span></h3>
-      <div class="input-group"><input id="adminEventTitle" placeholder="Event Title"></div>
-      <div class="input-group"><input id="adminEventDate" type="date"></div>
-      <div class="input-group"><textarea id="adminEventDesc" rows="2" placeholder="Event Description"></textarea></div>
-      <button type="button" id="adminAddEventBtn" class="btn btn-accent"><i class="fas fa-calendar-plus"></i> Add Event</button>
-      <div id="adminEventList" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <h3>📨 Send Message to Team <span class="admin-badge">Admin</span></h3>
-      <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Send WhatsApp message to individual team members or broadcast to all</p>
-      <div class="input-group">
-        <select id="adminTeamMemberSelect">
-          <option value="all">📢 Send to ALL Team Members</option>
-        </select>
+      <h3>📋 Admin Modules <span class="admin-badge">Menu</span></h3>
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleRegisterTeam')"><i class="fas fa-user-plus"></i> Register Team Member</button>
+      <div id="moduleRegisterTeam" class="admin-module-content">
+        <div class="input-group"><input id="adminVolName" placeholder="Full Name"></div>
+        <div class="input-group"><input id="adminVolMobile" placeholder="Mobile Number"></div>
+        <div class="input-group"><input id="adminVolArea" placeholder="Area / Booth"></div>
+        <button type="button" id="adminAddVolunteerBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> <span id="adminAddVolText">Add Team Member</span></button>
       </div>
-      <div class="input-group">
-        <select id="adminMsgTemplate">
-          <option value="default">📝 Default Message</option>
-          <option value="meeting">📅 Team Meeting Invitation</option>
-          <option value="task">📋 Task Assignment</option>
-          <option value="update">🔄 Campaign Update</option>
-          <option value="custom">✏️ Custom Message</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <textarea id="adminCustomMessage" rows="4" placeholder="Type your message here...">🙏 Hello Team! Great work on the campaign. Let's continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳</textarea>
-      </div>
-      <button type="button" id="adminSendTeamMsgBtn" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> <span id="adminSendMsgText">Send WhatsApp Message</span></button>
-      <div id="adminSendStatus" style="margin-top:8px;font-size:13px;"></div>
-    </div>
 
-    <div class="card">
-      <h3>📨 Team Message History <span class="admin-badge">Admin</span></h3>
-      <div id="adminTeamMsgHistory"></div>
-    </div>
-
-    <div class="card"><h3>🏠 All House Visits <span class="admin-badge">Admin</span></h3><div id="adminAllVisits"></div></div>
-    <div class="card"><h3>📋 All Daily Reports <span class="admin-badge">Admin</span></h3><div id="adminAllReports"></div></div>
-    <div class="card"><h3>⚠️ All Reported Issues <span class="admin-badge">Admin</span></h3><div id="adminIssuesList"></div></div>
-    <div class="card"><h3>📋 Volunteer Approvals <span class="admin-badge">Admin</span></h3><div id="pendingVolunteersList"></div></div>
-    <div class="card"><h3>✅ Approved Volunteers <span class="admin-badge">Admin</span></h3><div id="approvedVolunteersList"></div></div>
-    <div class="card">
-      <h3>📊 Volunteer Reports <span class="admin-badge">Admin</span></h3>
-      <div class="search-box">
-        <select id="adminReportFilter"><option value="all">All Volunteers</option></select>
-        <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleEvents')"><i class="fas fa-calendar-plus"></i> Manage Upcoming Events</button>
+      <div id="moduleEvents" class="admin-module-content">
+        <div class="input-group"><input id="adminEventTitle" placeholder="Event Title"></div>
+        <div class="input-group"><input id="adminEventDate" type="date"></div>
+        <div class="input-group"><textarea id="adminEventDesc" rows="2" placeholder="Event Description"></textarea></div>
+        <button type="button" id="adminAddEventBtn" class="btn btn-accent"><i class="fas fa-calendar-plus"></i> Add Event</button>
+        <div id="adminEventList" style="margin-top:10px;"></div>
       </div>
-      <div id="adminFilteredReports"></div>
-    </div>
-    <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
-    
-    <div class="card">
-      <h3>🖼️ Manage Gallery <span class="badge-premium">Images & Videos</span></h3>
-      <div class="input-group"><input type="file" id="galleryMediaInput" accept="image/*,video/*"></div>
-      <div class="input-group"><input id="galleryCaption" placeholder="Caption"></div>
-      <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-upload"></i> <span>Upload Media</span></button>
-      <div id="adminGalleryGrid" class="gallery-grid" style="margin-top:10px;"></div>
-      <div id="adminVideoGrid" class="video-grid" style="margin-top:10px;"></div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleSendMsg')"><i class="fas fa-envelope"></i> Send Message to Team</button>
+      <div id="moduleSendMsg" class="admin-module-content">
+        <div class="input-group">
+          <select id="adminTeamMemberSelect"><option value="all">📢 Send to ALL Team Members</option></select>
+        </div>
+        <div class="input-group">
+          <select id="adminMsgTemplate">
+            <option value="default">📝 Default Message</option>
+            <option value="meeting">📅 Team Meeting Invitation</option>
+            <option value="task">📋 Task Assignment</option>
+            <option value="update">🔄 Campaign Update</option>
+            <option value="custom">✏️ Custom Message</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <textarea id="adminCustomMessage" rows="4" placeholder="Type your message here...">🙏 Hello Team! Great work on the campaign. Let's continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳</textarea>
+        </div>
+        <button type="button" id="adminSendTeamMsgBtn" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> <span id="adminSendMsgText">Send WhatsApp Message</span></button>
+        <div id="adminSendStatus" style="margin-top:8px;font-size:13px;"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleMsgHistory')"><i class="fas fa-history"></i> Team Message History</button>
+      <div id="moduleMsgHistory" class="admin-module-content">
+        <div id="adminTeamMsgHistory"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleAllVisits')"><i class="fas fa-door-open"></i> All House Visits</button>
+      <div id="moduleAllVisits" class="admin-module-content">
+        <div id="adminAllVisits"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleAllReports')"><i class="fas fa-file-alt"></i> All Daily Reports</button>
+      <div id="moduleAllReports" class="admin-module-content">
+        <div id="adminAllReports"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleAllIssues')"><i class="fas fa-exclamation-triangle"></i> All Reported Issues</button>
+      <div id="moduleAllIssues" class="admin-module-content">
+        <div id="adminIssuesList"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('modulePendingVol')"><i class="fas fa-user-clock"></i> Volunteer Approvals</button>
+      <div id="modulePendingVol" class="admin-module-content">
+        <div id="pendingVolunteersList"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleApprovedVol')"><i class="fas fa-user-check"></i> Approved Volunteers</button>
+      <div id="moduleApprovedVol" class="admin-module-content">
+        <div id="approvedVolunteersList"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleVolReports')"><i class="fas fa-chart-bar"></i> Volunteer Reports</button>
+      <div id="moduleVolReports" class="admin-module-content">
+        <div class="search-box">
+          <select id="adminReportFilter"><option value="all">All Volunteers</option></select>
+          <button class="btn btn-sm btn-outline" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
+        </div>
+        <div id="adminFilteredReports"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleFullReports')"><i class="fas fa-file-invoice"></i> Complete Reports</button>
+      <div id="moduleFullReports" class="admin-module-content">
+        <div id="adminFullReports"></div>
+      </div>
+
+      <button class="admin-module-btn" onclick="toggleAdminModule('moduleGallery')"><i class="fas fa-images"></i> Manage Gallery</button>
+      <div id="moduleGallery" class="admin-module-content">
+        <div class="input-group"><input type="file" id="galleryMediaInput" accept="image/*,video/*"></div>
+        <div class="input-group"><input id="galleryCaption" placeholder="Caption"></div>
+        <button type="button" id="uploadGalleryBtn" class="btn btn-accent"><i class="fas fa-upload"></i> <span>Upload Media</span></button>
+        <div id="adminGalleryGrid" class="gallery-grid" style="margin-top:10px;"></div>
+        <div id="adminVideoGrid" class="video-grid" style="margin-top:10px;"></div>
+      </div>
     </div>
   </div>
 
@@ -428,10 +454,24 @@ var isAdmin = false;
 
 // TRANSLATIONS
 var TE = {
-  headerSub: "కార్పొరేటర్ ఎన్నికల ప్రచారం", call: "కాల్", wa: "WhatsApp", 
+  headerSub: "ప్రజల అభివృద్ధే మా లక్ష్యం", call: "కాల్", wa: "WhatsApp", 
   vol: "వాలంటీర్ చేరండి", issue: "సమస్య నమోదు",
   promises: "🎯 ప్రధాన వాగ్దానాలు",
-  promisesList: ["✅ 24x7 స్వచ్ఛమైన నీటి సరఫరా", "✅ గుంతలు లేని రోడ్లు", "✅ ఇంటింటికీ చెత్త సేకరణ", "✅ మహిళా భద్రత - సీసీ కెమెరాలు"],
+  promisesList: [
+    "24x7 స్వచ్ఛమైన నీటి సరఫరా",
+    "గుంతలు లేని రోడ్లు",
+    "ఇంటింటికీ చెత్త సేకరణ",
+    "మహిళా భద్రత - సీసీ కెమెరాలు",
+    "24×7 అందుబాటులో ఉంటాను",
+    "రాజకీయాలకు అతీతంగా సేవ",
+    "సమస్యల పరిష్కారం",
+    "ప్రభుత్వ పథకాల అమలు",
+    "పారదర్శక పరిపాలన",
+    "అభివృద్ధి, పరిశుభ్రత, సంక్షేమం",
+    "ఉచిత ఆరోగ్య శిబిరాలు",
+    "మహిళలు, వృద్ధుల ఆరోగ్య సేవలు",
+    "అత్యవసర అంబులెన్స్ సహకారం"
+  ],
   total: "మొత్తం ఇళ్లు", covered: "కవర్ అయినవి", follow: "ఫాలోఅప్", issuesLabel: "సమస్యలు",
   d2d: "🏠 ఇంటి వివరాలు నమోదు", save: "సేవ్ చేయండి", 
   housePlace: "ఇంటి నంబర్ / పేరు", familyPlace: "కుటుంబ పేరు", mobilePlace: "మొబైల్ నంబర్", volPlace: "వాలంటీయర్ ఎంచుకోండి",
@@ -461,10 +501,24 @@ var TE = {
 };
 
 var EN = {
-  headerSub: "Corporator Election Campaign", call: "Call", wa: "WhatsApp", 
+  headerSub: "People's Development is Our Goal", call: "Call", wa: "WhatsApp", 
   vol: "Join Volunteer", issue: "Report Issue",
   promises: "🎯 Key Promises",
-  promisesList: ["✅ 24x7 Clean Water Supply", "✅ Pothole-free Roads", "✅ Door-to-door Garbage Collection", "✅ Women Safety - CCTV Cameras"],
+  promisesList: [
+    "24x7 Clean Water Supply",
+    "Pothole-free Roads",
+    "Door-to-door Garbage Collection",
+    "Women Safety - CCTV Cameras",
+    "Available 24×7",
+    "Service Beyond Politics",
+    "Issue Resolution",
+    "Government Scheme Implementation",
+    "Transparent Governance",
+    "Development, Cleanliness, Welfare",
+    "Free Health Camps",
+    "Women & Elderly Health Services",
+    "Emergency Ambulance Support"
+  ],
   total: "Total Houses", covered: "Covered", follow: "Follow-up", issuesLabel: "Issues",
   d2d: "🏠 House Visit Entry", save: "Save Visit",
   housePlace: "House Number / Name", familyPlace: "Family Name", mobilePlace: "Mobile Number", volPlace: "Select Volunteer",
@@ -586,10 +640,11 @@ function setLanguage(lang) {
   if (elements.upcomingEventsTitle) elements.upcomingEventsTitle.innerText = currentText.upcomingEvents;
   if (elements.galleryPublicTitle) elements.galleryPublicTitle.innerText = currentText.gallery;
   
+  // Render promises list with single checkmark
   var promisesUl = document.getElementById("promisesList");
   if (promisesUl) {
     promisesUl.innerHTML = currentText.promisesList.map(function(p) { 
-      return '<li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">'+p+'</li>'; 
+      return '<li style="padding:6px 0;border-bottom:1px solid #f1f5f9;">✅ ' + p + '</li>';
     }).join("");
   }
   
@@ -689,6 +744,14 @@ function closeLoginPopup() {
 function updateAdminUI() {
   var issueCount = document.getElementById("adminIssueCount");
   if (issueCount) issueCount.innerText = appData.issues.length;
+}
+
+// ======================= TOGGLE ADMIN MODULES =======================
+function toggleAdminModule(moduleId) {
+  var content = document.getElementById(moduleId);
+  if (content) {
+    content.classList.toggle('active');
+  }
 }
 
 // ======================= FILTERS =======================
@@ -1815,7 +1878,6 @@ function applyConfig() {
   if (photo) photo.src = appData.config.photo;
   if (waLink) waLink.href = "https://api.whatsapp.com/send?phone=91" + whatsappNumber;
   if (floatBtn) floatBtn.href = "https://api.whatsapp.com/send?phone=91" + whatsappNumber;
-  // Also update the click handlers for any WhatsApp buttons
   var allWhatsAppBtns = document.querySelectorAll('.btn-whatsapp, .btn-accent .fab.fa-whatsapp, .whatsapp-float');
   for(var i=0; i<allWhatsAppBtns.length; i++) {
     var btn = allWhatsAppBtns[i];
@@ -2109,7 +2171,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 30000);
   }
   
-  // Apply WhatsApp config after DOM load
   applyConfig();
 });
 
@@ -2134,6 +2195,7 @@ window.openLightbox = openLightbox;
 window.closeLightbox = closeLightbox;
 window.deleteTeamMessage = deleteTeamMessage;
 window.adminAddEvent = adminAddEvent;
+window.toggleAdminModule = toggleAdminModule;
 </script>
 </body>
 </html>
